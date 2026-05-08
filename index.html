@@ -1,0 +1,2491 @@
+<!-- NomeDoApp = "Hidratação Neonatal" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cálculo de Hidratação Venosa</title>
+  <style>
+    :root {
+      --azul:     #1a3a6b;
+      --azul-med: #2563a8;
+      --azul-clr: #dbeafe;
+      --verde:    #166534;
+      --verde-bg: #dcfce7;
+      --amarelo:  #854d0e;
+      --amarelo-bg: #fef9c3;
+      --cinza:    #f1f5f9;
+      --borda:    #cbd5e1;
+      --texto:    #1e293b;
+      --branco:   #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: #e8f0fe;
+      color: var(--texto);
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--azul);
+      letter-spacing: -0.5px;
+    }
+    header p {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .wrapper {
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* -------- SEÇÃO -------- */
+    .secao {
+      background: var(--branco);
+      border: 1.5px solid var(--borda);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .secao-header {
+      background: var(--azul);
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .secao-body {
+      padding: 14px;
+    }
+
+    /* -------- GRID -------- */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; row-gap: 4px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 14px; row-gap: 4px; }
+    @media (max-width: 560px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .prescricao-resultados-compactos {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 8px;
+      row-gap: 4px;
+      align-items: start;
+    }
+    .prescricao-resultados-compactos + .prescricao-resultados-compactos {
+      margin-top: 4px;
+    }
+    .prescricao-resultados-compactos .campo {
+      min-width: 0;
+    }
+    .prescricao-resultados-compactos .campo label {
+      font-size: 0.68rem;
+      line-height: 1.05;
+      letter-spacing: 0.1px;
+    }
+    .prescricao-resultados-compactos .campo input {
+      font-size: 0.86rem;
+      padding: 5px 7px;
+      border-radius: 7px;
+    }
+    .prescricao-resultados-compactos .campo .unidade {
+      font-size: 0.66rem;
+      line-height: 1.05;
+    }
+
+    .secao-js-collapsible > .secao-header {
+      cursor: pointer;
+      user-select: none;
+    }
+    .secao-js-collapsible > .secao-header::after {
+      content: "▾";
+      float: right;
+      font-size: 0.9rem;
+      transition: transform 0.15s ease;
+    }
+    .secao-js-collapsible.is-collapsed > .secao-header::after {
+      content: "▸";
+    }
+    .secao-js-collapsible.is-collapsed > .secao-body {
+      display: none;
+    }
+
+    /* -------- CAMPO -------- */
+    .campo { display: flex; flex-direction: column; gap: 2px; }
+    .campo label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #334155;
+      letter-spacing: 0.3px;
+      line-height: 1.1;
+    }
+    .campo input, .campo select {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 0.94rem;
+      font-weight: 600;
+      padding: 6px 9px;
+      border: 1.5px solid var(--borda);
+      border-radius: 7px;
+      background: #f8fbff;
+      color: #0f172a;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+    .campo input:focus, .campo select:focus {
+      outline: none;
+      border-color: var(--azul-med);
+      background: #fff;
+    }
+    .campo input[readonly] {
+      background: var(--azul-clr);
+      color: var(--azul);
+      font-weight: 600;
+      border-color: #93c5fd;
+      cursor: default;
+    }
+    .campo input.resultado-verde[readonly] {
+      background: var(--verde-bg);
+      color: var(--verde);
+      border-color: #86efac;
+    }
+    .campo input.resultado-amarelo[readonly] {
+      background: var(--amarelo-bg);
+      color: var(--amarelo);
+      border-color: #fde047;
+    }
+    .campo .unidade {
+      font-size: 0.7rem;
+      color: #475569;
+      font-weight: 600;
+      margin-top: 0;
+      line-height: 1.05;
+    }
+    .campo input::placeholder {
+      color: #64748b;
+      opacity: 1;
+    }
+
+    /* -------- INLINE (select + input na mesma linha) -------- */
+    .campo-inline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .campo-inline select {
+      width: auto;
+      flex-shrink: 0;
+    }
+    .campo-inline input {
+      flex: 1;
+    }
+
+    /* -------- BOTÕES -------- */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 9px 22px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.3px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: var(--azul);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--azul-med); }
+    .btn-secondary {
+      background: var(--azul-med);
+      color: #fff;
+    }
+    .btn-secondary:hover { background: var(--azul); }
+    .btn-reset {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1.5px solid var(--borda);
+    }
+    .btn-reset:hover { background: #e2e8f0; }
+
+    /* -------- DIVISOR -------- */
+    .divider {
+      border: none;
+      border-top: 1.5px dashed var(--borda);
+      margin: 10px 0;
+    }
+
+    /* -------- BADGE ALERTA -------- */
+    .info-badge {
+      font-size: 0.73rem;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: #1e40af;
+      margin-top: 10px;
+    }
+
+    .espaco-final {
+      height: 4.2em;
+    }
+
+    .error-toast {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 9999;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: min(420px, calc(100vw - 32px));
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1.5px solid #fca5a5;
+      background: linear-gradient(135deg, #fef2f2 0%, #fef3c7 100%);
+      color: #991b1b;
+      box-shadow: 0 12px 28px rgba(127, 29, 29, 0.18);
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .error-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .error-toast-icon {
+      font-size: 1rem;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+    .error-toast-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .error-toast-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .error-toast-message {
+      font-size: 0.84rem;
+      line-height: 1.35;
+      color: #7f1d1d;
+    }
+  
+    .secao-collapsible > summary.secao-header {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+    }
+    .secao-collapsible > summary.secao-header::-webkit-details-marker {
+      display: none;
+    }
+    .secao-collapsible > summary.secao-header::after {
+      content: "▾";
+      float: right;
+      font-size: 0.9rem;
+      transition: transform 0.15s ease;
+    }
+    .secao-collapsible:not([open]) > summary.secao-header::after {
+      content: "▸";
+    }
+  
+    .alerta-solucao {
+      margin-top: 8px;
+      border: 1.5px solid #f59e0b;
+      background: #fffbeb;
+      color: #92400e;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+    .alerta-solucao strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #78350f;
+    }
+    .alerta-solucao ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .alerta-solucao li + li {
+      margin-top: 5px;
+    }
+    .alerta-ajuste-automatico {
+      border-color: #dc2626;
+      background: #fef2f2;
+      color: #7f1d1d;
+    }
+    .alerta-ajuste-automatico strong {
+      color: #991b1b;
+    }
+    .is-hidden {
+      display: none !important;
+    }
+  
+    .espaco-antes-titulo {
+      height: 1em;
+    }
+  
+    .legal-disclaimer {
+      margin: 16px auto 0;
+      max-width: 820px;
+      font-size: 12px;
+      line-height: 1.2;
+      color: #5c6f87;
+      text-align: justify;
+      word-break: break-word;
+      background: var(--branco, #ffffff);
+      border: 1px solid var(--borda, #cddbea);
+      border-radius: 22px;
+      box-shadow: 0 16px 34px rgba(18, 44, 73, 0.10);
+      padding: 16px;
+    }
+
+    .signature-block {
+      max-width: 820px;
+      margin: 12px auto 0;
+      text-align: center;
+      color: #5c6f87;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .spacer-3lines {
+      height: 4.2em;
+    }
+  </style>
+</head>
+<body>
+
+<div id="errorToast" class="error-toast" role="alert" aria-live="assertive" aria-atomic="true">
+  <span class="error-toast-icon" aria-hidden="true">⚠️</span>
+  <div class="error-toast-content">
+    <span class="error-toast-title">Erro de validação</span>
+    <span id="errorToastMessage" class="error-toast-message"></span>
+  </div>
+</div>
+
+<header>
+  <div class="espaco-antes-titulo" aria-hidden="true"></div>
+  <h1>💧Hidratação Venosa Neonatal</h1>
+  <p>Preparo por etapas de Hidratação Venosa Neonatal com mistura de soluções e cálculo da Taxa de Infusão de Glicose</p>
+</header>
+
+<form id="formHidra" autocomplete="off">
+<div class="wrapper">
+
+  <!-- ====== SEÇÃO 1: PARÂMETROS DE ENTRADA ====== -->
+  <div class="secao" id="secaoParametros">
+    <div class="secao-header">① Parâmetros de Entrada</div>
+    <div class="secao-body">
+      <div class="grid-2">
+        <div class="campo">
+          <label>Peso de Cálculo</label>
+          <input type="number" step="0.1" min="0" max="10" name="peso" value="3.000">
+          <span class="unidade">kg</span>
+        </div>
+        <div class="campo">
+          <label>Número de Etapas</label>
+          <input type="number" step="1" min="0" max="24" name="etapas" value="1">
+          <span class="unidade">etapas/dia</span>
+        </div>
+        <div class="campo">
+          <label>Volume</label>
+          <input type="number" step="0.1" min="0" name="volume" value="70" max="200">
+          <span class="unidade">ml/kg/dia</span>
+        </div>
+        <div class="campo">
+          <label>Sódio (NaCl)</label>
+          <div class="campo-inline">
+            <select name="concso">
+              <option value="1">10%</option>
+              <option value="2" selected>20%</option>
+            </select>
+            <input type="number" step="0.1" min="0" name="sodio" value="3.4" max="10">
+          </div>
+          <span class="unidade">mEq/kg/dia</span>
+        </div>
+        <div class="campo">
+          <label>Potássio (KCl 10%)</label>
+          <input type="number" step="0.1" min="0" name="potassio" value="1.3" max="10">
+          <span class="unidade">mEq/kg/dia</span>
+        </div>
+        <div class="campo">
+          <label>Cálcio (Gluconato de Cálcio 10%)</label>
+          <input type="number" step="0.1" min="0" name="calcio" value="150" max="1000">
+          <span class="unidade">mg/kg/dia de gluconato de cálcio 10%</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="reset" class="btn btn-reset" data-clear-top="true">
+          Limpar Dados
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SEÇÃO 2: PRESCRIÇÃO POR ETAPA ====== -->
+  <div class="secao" id="secaoPrescricao">
+    <div class="secao-header">② Prescrição por Etapa</div>
+    <div class="secao-body">
+      <div class="grid-2">
+        <div class="campo">
+          <label>Volume base glicosado por Etapa</label>
+          <input type="text" name="volumetotal" value="0" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>NaCl por Etapa</label>
+          <div class="campo-inline">
+            <select name="concsodio">
+              <option value="1">10%</option>
+              <option value="2" selected>20%</option>
+            </select>
+            <input type="text" name="sodiototal" value="0" inputmode="decimal">
+          </div>
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>KCl 10% por Etapa</label>
+          <input type="text" name="potassiototal" value="0" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>Gluconato de Cálcio 10% por Etapa</label>
+          <input type="text" name="calciototal" value="0" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="prescricao-resultados-compactos">
+        <div class="campo">
+          <label>Volume Total da Etapa</label>
+          <input type="text" name="volt" value="0" class="resultado-verde" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>Infundir em</label>
+          <input type="text" name="mlhora" value="0" class="resultado-verde" inputmode="decimal">
+          <span class="unidade">ml/hora</span>
+        </div>
+      </div>
+
+      <div class="prescricao-resultados-compactos">
+        <div class="campo">
+          <label>Tempo por Etapa</label>
+          <input type="text" name="tempohoras" value="0" class="resultado-verde" readonly>
+          <span class="unidade">horas</span>
+        </div>
+        <div class="campo">
+          <label>Volume nas 24h</label>
+          <input type="text" name="volume1" value="0" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+      </div>
+
+      <div class="prescricao-resultados-compactos">
+        <div class="campo">
+          <label>Taxa Hídrica Total</label>
+          <input type="text" name="volume2" value="0" inputmode="decimal">
+          <span class="unidade">ml/kg/dia</span>
+        </div>
+        <div class="campo">
+          <label>Peso de Cálculo</label>
+          <input type="number" step="0.1" min="0" max="10" name="peso1" value="0">
+          <span class="unidade">kg</span>
+        </div>
+      </div>
+
+      <div class="prescricao-resultados-compactos">
+        <div class="campo">
+          <label>Número de Etapas</label>
+          <input type="number" step="1" min="0" max="24" name="etapas2" value="1">
+          <span class="unidade">etapas/dia</span>
+        </div>
+        <div class="campo">
+          <label>Osmolaridade estimada</label>
+          <input type="text" name="osmolaridade" value="0" class="resultado-amarelo" readonly>
+          <span class="unidade">mOsm/L</span>
+        </div>
+      </div>
+      <div id="alertaSolucao" class="alerta-solucao is-hidden" role="alert" aria-live="polite"></div>
+
+    </div>
+  </div>
+
+  <!-- ====== SEÇÃO 3: MISTURA DE GLICOSE ====== -->
+  <details class="secao secao-collapsible" id="secaoMistura" open>
+    <summary class="secao-header">③ Mistura de Soluções Glicosadas</summary>
+    <div class="secao-body">
+      <div class="grid-2">
+        <div class="campo">
+          <label>Volume base glicosado por Etapa</label>
+          <input type="text" name="volume3" value="0" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>Concentração Desejada</label>
+          <input type="number" step="0.1" min="0" max="50" name="cd" value="10">
+          <span class="unidade">% glicose</span>
+        </div>
+        <div class="campo">
+          <label>Concentração do 1º Soro (menor)</label>
+          <select name="cs1">
+            <option value="0">0% (Água destilada)</option>
+            <option value="5" selected>5%</option>
+            <option value="10">10%</option>
+            <option value="25">25%</option>
+            <option value="50">50%</option>
+          </select>
+          <span class="unidade">% glicose</span>
+        </div>
+        <div class="campo">
+          <label>Volume do 1º Soro</label>
+          <input type="text" name="vs1" value="0" class="resultado-amarelo" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>Concentração do 2º Soro (maior)</label>
+          <select name="cs2">
+            <option value="0">0% (Água destilada)</option>
+            <option value="5">5%</option>
+            <option value="10">10%</option>
+            <option value="25" selected>25%</option>
+            <option value="50">50%</option>
+          </select>
+          <span class="unidade">% glicose</span>
+        </div>
+        <div class="campo">
+          <label>Volume do 2º Soro</label>
+          <input type="text" name="vs2" value="0" class="resultado-amarelo" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>T.I.G.</label>
+          <input type="text" name="tig" value="0" class="resultado-verde" inputmode="decimal">
+          <span class="unidade">mg/kg/minuto</span>
+        </div>
+      </div>
+      <div id="alertaAjusteAutomaticoMistura" class="alerta-solucao alerta-ajuste-automatico is-hidden" role="alert" aria-live="assertive"></div>
+      <div id="alertaMistura" class="alerta-solucao is-hidden" role="alert" aria-live="polite"></div>
+    </div>
+  </details>
+
+  <!-- ====== BOTÃO LIMPAR ====== -->
+  <div style="text-align:center;">
+    <button type="reset" class="btn btn-reset">Limpar Dados</button>
+  </div>
+
+</div><!-- /wrapper -->
+</form>
+
+
+<div class="legal-disclaimer">
+  <strong>Aviso Legal e Isenção de Responsabilidade:</strong><br>
+  Este software e todas as informações nele contidas são fornecidos exclusivamente com propósitos educacionais e de auxílio à referência médica. ESTE SISTEMA NÃO SUBSTITUI O JULGAMENTO CLÍNICO INDIVIDUAL, A ANAMNESE E O EXAME FÍSICO. As informações aqui apresentadas não devem ser utilizadas isoladamente para o diagnóstico, conduta ou tratamento de pacientes. A responsabilidade final por qualquer decisão clínica, prescrição ou intervenção é exclusiva do profissional de saúde assistente, devidamente habilitado. Os desenvolvedores não garantem a precisão absoluta de todos os dados e isentam-se de responsabilidade por quaisquer danos diretos, indiretos, materiais ou morais que resultem do uso inadequado, interpretação equivocada ou confiança exclusiva nas informações deste sistema. Pacientes e indivíduos leigos que utilizarem este software devem sempre buscar a orientação de um médico qualificado antes de tomar qualquer decisão sobre sua saúde.
+
+</div>
+<div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong></div>
+
+<div class="spacer-3lines" aria-hidden="true"></div>
+
+
+<script>
+"use strict";
+
+(function () {
+  // ==========================================================
+  // dom refs
+  // ==========================================================
+  var DOM = {
+    form: document.getElementById("formHidra"),
+    errorToast: document.getElementById("errorToast"),
+    errorToastMessage: document.getElementById("errorToastMessage")
+  };
+
+  var form = DOM.form;
+  var errorToast = DOM.errorToast;
+  var errorToastMessage = DOM.errorToastMessage;
+
+  // ==========================================================
+  // constants
+  // ==========================================================
+  var EPS = 1e-9;
+  var TOAST_DURATION_MS = 5000;
+  var ALLOWED_GLUCOSE = [0, 5, 10, 25, 50];
+  var DEXTROSE_MONOHYDRATE_MW = 198.17; // g/mol; dextrose monohidratada usada em soluções IV
+
+  var ALERT_LIMITS = {
+    potassiumConcentration: 40,
+    sodiumIsotonicReference: 154,
+    osmLow: 250,
+    osmPeripheralCaution: 900,
+    osmHigh: 1000,
+    glucosePeripheralCaution: 10,
+    glucoseConcentrated: 12.5,
+    tigHigh: 8,
+    tigVeryHigh: 12,
+    calciumContinuousMaxMgMl: 10,
+    calciumBolusMaxMgMl: 50,
+    mixMinimumVisibleComponentMl: 0.1
+  };
+
+  // ==========================================================
+  // state
+  // ==========================================================
+  var state = null;
+  var updating = false;
+  var errorToastHideTimer = null;
+  var initialRawState = null;
+
+  // ==========================================================
+  // field metadata
+  // ==========================================================
+  var FIELD_META = {
+    peso:        { path: "clinical.peso", decimals: 1, role: "input-direto" },
+    etapas:      { path: "clinical.etapas", decimals: 0, role: "input-direto" },
+    etapas2:     { path: "clinical.etapas", decimals: 0, role: "input-inverso" },
+    volume:      { path: "clinical.volume", decimals: 1, role: "input-direto" },
+    sodio:       { path: "clinical.sodio", decimals: 1, role: "input-direto" },
+    potassio:    { path: "clinical.potassio", decimals: 1, role: "input-direto" },
+    calcio:      { path: "clinical.calcio", decimals: 1, role: "input-direto" },
+    concso:      { path: "clinical.concso", decimals: 0, role: "input-direto" },
+
+    volumetotal:   { path: "prescricao.volumetotal", decimals: 1, role: "input-inverso" },
+    sodiototal: { path: "prescricao.sodiototal", decimals: 1, role: "input-inverso" },
+    potassiototal: { path: "prescricao.potassiototal", decimals: 1, role: "input-inverso" },
+    calciototal: { path: "prescricao.calciototal", decimals: 1, role: "input-inverso" },
+    concsodio:     { path: "prescricao.concsodio", decimals: 0, role: "input-inverso" },
+    peso1:         { path: "clinical.peso", decimals: 1, role: "input-inverso" },
+
+    volt:       { path: "derivados.volt", decimals: 2, role: "reverso" },
+    tempohoras: { path: "derivados.tempohoras", decimals: 1, role: "exibicao" },
+    mlhora:     { path: "derivados.mlhora", decimals: 1, role: "reverso" },
+    osmolaridade: { path: "derivados.osmolaridade", decimals: 1, role: "exibicao" },
+    volume1:    { path: "derivados.volume1", decimals: 1, role: "reverso" },
+    volume2:    { path: "derivados.volume2", decimals: 1, role: "reverso" },
+    volume3:    { path: "mistura.volume3", decimals: 1, role: "reverso" },
+    cd:         { path: "mistura.cd", decimals: 1, role: "reverso" },
+    cs1:        { path: "mistura.cs1", decimals: 0, role: "reverso" },
+    cs2:        { path: "mistura.cs2", decimals: 0, role: "reverso" },
+    vs1:        { path: "mistura.vs1", decimals: 1, role: "reverso" },
+    vs2:        { path: "mistura.vs2", decimals: 1, role: "reverso" },
+    tig:        { path: "mistura.tig", decimals: 1, role: "reverso" }
+  };
+
+  // ==========================================================
+  // formatters
+  // ==========================================================
+  function round(value, decimals) {
+    var factor = Math.pow(10, decimals);
+    return Math.round(value * factor) / factor;
+  }
+
+  // ==========================================================
+  // parsers
+  // ==========================================================
+  function parseDecimal(value) {
+    if (value == null) return NaN;
+    if (typeof value === "number") return value;
+    var normalized = String(value).trim().replace(/\s+/g, "").replace(",", ".");
+    if (normalized === "") return NaN;
+    return Number(normalized);
+  }
+
+  function formatField(name, value, snapshot) {
+    if (!Number.isFinite(value)) return "";
+    var decimals = getFieldDecimals(name, snapshot);
+    return round(value, decimals).toFixed(decimals);
+  }
+
+  function deepClone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function getByPath(obj, path) {
+    return path.split(".").reduce(function (acc, key) {
+      return acc[key];
+    }, obj);
+  }
+
+  function setByPath(obj, path, value) {
+    var keys = path.split(".");
+    var last = keys.pop();
+    var target = keys.reduce(function (acc, key) {
+      return acc[key];
+    }, obj);
+    target[last] = value;
+  }
+
+  function isAllowedGlucose(value) {
+    return ALLOWED_GLUCOSE.indexOf(Number(value)) >= 0;
+  }
+
+  function clamp(value, min, max) {
+    if (!Number.isFinite(value)) return value;
+    var result = value;
+    if (Number.isFinite(min)) result = Math.max(min, result);
+    if (Number.isFinite(max)) result = Math.min(max, result);
+    return result;
+  }
+
+  function safeNonNegative(value) {
+    return Number.isFinite(value) ? Math.max(0, value) : 0;
+  }
+
+  function isPrecisionMode(snapshot) {
+    return !!(
+      snapshot &&
+      snapshot.clinical &&
+      Number.isFinite(snapshot.clinical.peso) &&
+      snapshot.clinical.peso < 1.5
+    );
+  }
+
+  function getFieldDecimals(name, snapshot) {
+    if (!FIELD_META[name]) return 0;
+
+    var referenceSnapshot = snapshot || state;
+
+    // O volume base glicosado por etapa fecha a soma exibida e deve manter 1 casa decimal em todos os pesos.
+    if (name === "volumetotal" || name === "volume3") return 1;
+
+    // Em peso < 1,5 kg, eletrólitos exibem 2 casas decimais para reduzir erro proporcional.
+    if (
+      isPrecisionMode(referenceSnapshot) &&
+      (name === "sodiototal" || name === "potassiototal" || name === "calciototal")
+    ) {
+      return 2;
+    }
+
+    return FIELD_META[name].decimals;
+  }
+
+  function getFieldRoleTitle(role) {
+    var titles = {
+      "input-direto": "Campo editável de entrada direta.",
+      "input-inverso": "Campo editável para recálculo inverso da prescrição.",
+      "reverso": "Campo editável com cálculo reverso.",
+      "exibicao": "Campo apenas de exibição automática."
+    };
+    return titles[role] || "";
+  }
+
+  function sanitizeInputValue(name, value) {
+    if (!Number.isFinite(value)) return value;
+    var sanitized = value;
+
+    if (sanitized < 0) sanitized = 0;
+    if (name === "peso" || name === "peso1") sanitized = Math.min(sanitized, 10);
+    if (name === "etapas" || name === "etapas2") sanitized = Math.min(Math.round(sanitized), 24);
+    if (name === "volume" || name === "volume2") sanitized = Math.min(sanitized, 200);
+    if (name === "sodio" || name === "potassio") sanitized = Math.min(sanitized, 10);
+    if (name === "calcio") sanitized = Math.min(sanitized, 1000);
+    if (name === "volumetotal" || name === "volt" || name === "volume1" || name === "volume3") sanitized = Math.min(sanitized, 2000);
+    if (name === "cd") sanitized = Math.min(sanitized, 50);
+
+    return sanitized;
+  }
+
+  function getTempohorasForState(snapshot) {
+    var etapas = safeNonNegative(snapshot.clinical.etapas);
+    return etapas > 0 ? 24 / etapas : 0;
+  }
+
+  function computeEstimatedOsmolarity(snapshot) {
+    var volumeFinalMl = safeNonNegative(snapshot.derivados.volt);
+    if (volumeFinalMl <= EPS) return 0;
+
+    var volumeGlicoseMl = safeNonNegative(snapshot.mistura.volume3);
+    var concentracaoGlicosePercent = safeNonNegative(snapshot.mistura.cd);
+
+    var glicoseMosm =
+      volumeGlicoseMl *
+      ((concentracaoGlicosePercent * 10) / DEXTROSE_MONOHYDRATE_MW);
+
+    var concSodio = safeNonNegative(snapshot.prescricao.concsodio || snapshot.clinical.concso || 2);
+    var sodioMeq = safeNonNegative(snapshot.prescricao.sodiototal) * 1.7 * concSodio;
+    var naclMosm = sodioMeq * 2;
+
+    var potassioMeq = safeNonNegative(snapshot.prescricao.potassiototal) * 1.34;
+    var kclMosm = potassioMeq * 2;
+
+    var calcioMosm = safeNonNegative(snapshot.prescricao.calciototal) * 0.66;
+
+    return ((glicoseMosm + naclMosm + kclMosm + calcioMosm) / volumeFinalMl) * 1000;
+  }
+
+  function getMaxVoltForState(snapshot) {
+    var peso = safeNonNegative(snapshot.clinical.peso);
+    var etapas = safeNonNegative(snapshot.clinical.etapas);
+    if (peso <= 0 || etapas <= 0) return 0;
+    return Math.min(2000, (200 * peso) / etapas);
+  }
+
+  function getMaxVolume1ForState(snapshot) {
+    var peso = safeNonNegative(snapshot.clinical.peso);
+    return Math.min(2000, 200 * peso);
+  }
+
+  function getBudgetRemainingForState(snapshot, excludeName) {
+    var maxVolt = getMaxVoltForState(snapshot);
+    var used = 0;
+
+    if (excludeName !== "volumetotal" && excludeName !== "volume3") used += safeNonNegative(snapshot.prescricao.volumetotal);
+    if (excludeName !== "sodiototal") used += safeNonNegative(snapshot.prescricao.sodiototal);
+    if (excludeName !== "potassiototal") used += safeNonNegative(snapshot.prescricao.potassiototal);
+    if (excludeName !== "calciototal") used += safeNonNegative(snapshot.prescricao.calciototal);
+
+    return Math.max(0, maxVolt - used);
+  }
+
+  function getFieldMax(name, snapshot) {
+    var peso = safeNonNegative(snapshot.clinical.peso);
+    var etapas = safeNonNegative(snapshot.clinical.etapas);
+    var tempohoras = getTempohorasForState(snapshot);
+    var volume3 = safeNonNegative(snapshot.mistura.volume3);
+    var concsodio = safeNonNegative(snapshot.prescricao.concsodio || snapshot.clinical.concso || 2);
+
+    switch (name) {
+      case "peso":
+      case "peso1":
+        return 10;
+      case "etapas":
+      case "etapas2":
+        return 24;
+      case "volume":
+      case "volume2":
+        return 200;
+      case "sodio":
+      case "potassio":
+        return 10;
+      case "calcio":
+        return 1000;
+      case "volumetotal":
+      case "volume3":
+        return Math.min(2000, getBudgetRemainingForState(snapshot, "volumetotal"));
+      case "sodiototal": {
+        var sodiumMax = (peso > 0 && etapas > 0 && concsodio > 0) ? (peso * 10) / (1.7 * etapas * concsodio) : 0;
+        return Math.min(2000, sodiumMax, getBudgetRemainingForState(snapshot, "sodiototal"));
+      }
+      case "potassiototal": {
+        var potassiumMax = (peso > 0 && etapas > 0) ? (peso * 10) / (1.34 * etapas) : 0;
+        return Math.min(2000, potassiumMax, getBudgetRemainingForState(snapshot, "potassiototal"));
+      }
+      case "calciototal": {
+        var calciumMax = (peso > 0 && etapas > 0) ? (10 * peso) / etapas : 0;
+        return Math.min(2000, calciumMax, getBudgetRemainingForState(snapshot, "calciototal"));
+      }
+      case "volt":
+        return getMaxVoltForState(snapshot);
+      case "mlhora":
+        return tempohoras > 0 ? getMaxVoltForState(snapshot) / tempohoras : 0;
+      case "volume1":
+        return getMaxVolume1ForState(snapshot);
+      case "cd":
+        return 50;
+      case "vs1":
+      case "vs2":
+        return volume3;
+      case "tig":
+        return (peso > 0 && etapas > 0 && volume3 > 0)
+          ? (volume3 * 50 / 100 * 1000 * etapas) / (1440 * peso)
+          : 0;
+      default:
+        return Infinity;
+    }
+  }
+
+  function sanitizeValueForField(name, value, snapshot) {
+    if (!Number.isFinite(value)) return value;
+    var sanitized = value;
+    if (sanitized < 0) sanitized = 0;
+    if (name === "etapas" || name === "etapas2") sanitized = Math.round(sanitized);
+
+    var max = snapshot ? getFieldMax(name, snapshot) : Infinity;
+    if (Number.isFinite(max)) sanitized = Math.min(sanitized, max);
+
+    return sanitized;
+  }
+
+  function sanitizeFieldInState(name, snapshot) {
+    var currentValue = getByPath(snapshot, FIELD_META[name].path);
+    var sanitized = sanitizeValueForField(name, currentValue, snapshot);
+    setByPath(snapshot, FIELD_META[name].path, sanitized);
+
+    if (name === "volume3") {
+      snapshot.mistura.vs1 = clamp(safeNonNegative(snapshot.mistura.vs1), 0, sanitized);
+      snapshot.mistura.vs2 = clamp(safeNonNegative(snapshot.mistura.vs2), 0, sanitized);
+    }
+  }
+
+  function readSanitizedNumericField(name, fallback) {
+    // Leitura permitida apenas para inicialização/reset/importação.
+    // Esta função não escreve no DOM: renderização é responsabilidade exclusiva de render().
+    var raw = parseDecimal(form[name] && form[name].value);
+    var parsed = Number.isFinite(raw) ? raw : fallback;
+    return sanitizeInputValue(name, parsed);
+  }
+
+  function readSelectNumber(name, fallback) {
+    var parsed = parseDecimal(form[name] && form[name].value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+
+  function chooseGlucosePairForCd(cd) {
+    if (!Number.isFinite(cd) || cd < 0 - EPS || cd > 50 + EPS) {
+      throw new Error("A TIG calculada gerou concentração fora da faixa possível (0% a 50%).");
+    }
+    if (cd <= 5 + EPS) return { cs1: 0, cs2: 5 };
+    if (cd <= 10 + EPS) return { cs1: 5, cs2: 10 };
+    if (cd <= 25 + EPS) return { cs1: 10, cs2: 25 };
+    return { cs1: 25, cs2: 50 };
+  }
+
+  function chooseGlucosePairForCdPreferCurrent(cd, currentCs1, currentCs2) {
+    if (!Number.isFinite(cd) || cd < 0 - EPS || cd > 50 + EPS) {
+      throw new Error("A TIG calculada gerou concentração fora da faixa possível (0% a 50%).");
+    }
+
+    var normalizedCs1 = Number(currentCs1);
+    var normalizedCs2 = Number(currentCs2);
+
+    if (
+      isAllowedGlucose(normalizedCs1) &&
+      isAllowedGlucose(normalizedCs2) &&
+      normalizedCs1 < normalizedCs2 &&
+      cd >= normalizedCs1 - EPS &&
+      cd <= normalizedCs2 + EPS
+    ) {
+      return { cs1: normalizedCs1, cs2: normalizedCs2 };
+    }
+
+    var candidates = [];
+    for (var i = 0; i < ALLOWED_GLUCOSE.length; i += 1) {
+      for (var j = i + 1; j < ALLOWED_GLUCOSE.length; j += 1) {
+        var cs1 = ALLOWED_GLUCOSE[i];
+        var cs2 = ALLOWED_GLUCOSE[j];
+        if (cd < cs1 - EPS || cd > cs2 + EPS) continue;
+
+        candidates.push({
+          cs1: cs1,
+          cs2: cs2,
+          changes: (cs1 === normalizedCs1 ? 0 : 1) + (cs2 === normalizedCs2 ? 0 : 1),
+          totalDelta: Math.abs(cs1 - normalizedCs1) + Math.abs(cs2 - normalizedCs2),
+          width: cs2 - cs1
+        });
+      }
+    }
+
+    if (!candidates.length) return chooseGlucosePairForCd(cd);
+
+    candidates.sort(function (a, b) {
+      return (
+        a.changes - b.changes ||
+        a.totalDelta - b.totalDelta ||
+        a.width - b.width ||
+        a.cs1 - b.cs1 ||
+        a.cs2 - b.cs2
+      );
+    });
+
+    return { cs1: candidates[0].cs1, cs2: candidates[0].cs2 };
+  }
+
+  function createStateFromForm() {
+    return {
+      clinical: {
+        peso: readSanitizedNumericField("peso", 0),
+        etapas: readSanitizedNumericField("etapas", 1),
+        volume: readSanitizedNumericField("volume", 0),
+        sodio: readSanitizedNumericField("sodio", 0),
+        potassio: readSanitizedNumericField("potassio", 0),
+        calcio: readSanitizedNumericField("calcio", 0),
+        concso: readSelectNumber("concso", 2)
+      },
+      prescricao: {
+        volumetotal: readSanitizedNumericField("volumetotal", 0),
+        sodiototal: readSanitizedNumericField("sodiototal", 0),
+        potassiototal: readSanitizedNumericField("potassiototal", 0),
+        calciototal: readSanitizedNumericField("calciototal", 0),
+        concsodio: readSelectNumber("concsodio", 2)
+      },
+      derivados: {
+        volt: readSanitizedNumericField("volt", 0),
+        tempohoras: 24 / (readSanitizedNumericField("etapas", 1) || 1),
+        mlhora: readSanitizedNumericField("mlhora", 0),
+        osmolaridade: readSanitizedNumericField("osmolaridade", 0),
+        volume1: readSanitizedNumericField("volume1", 0),
+        volume2: readSanitizedNumericField("volume2", 0)
+      },
+      mistura: {
+        volume3: readSanitizedNumericField("volume3", 0),
+        cd: readSanitizedNumericField("cd", 10),
+        cs1: readSelectNumber("cs1", 5),
+        cs2: readSelectNumber("cs2", 25),
+        vs1: readSanitizedNumericField("vs1", 0),
+        vs2: readSanitizedNumericField("vs2", 0),
+        tig: readSanitizedNumericField("tig", 0)
+      }
+    };
+  }
+
+  function validateCommon(snapshot) {
+    if (snapshot.clinical.peso < 0.001) throw new Error("Peso muito baixo.");
+
+    if (!Number.isInteger(snapshot.clinical.etapas) || snapshot.clinical.etapas < 1 || snapshot.clinical.etapas > 24) {
+      throw new Error("Etapas devem ser um número inteiro entre 1 e 24.");
+    }
+
+    if (24 % snapshot.clinical.etapas !== 0) {
+      throw new Error("O número de etapas deve gerar tempo em horas inteiro. Exemplos válidos: 1, 2, 3, 4, 6, 8, 12 e 24.");
+    }
+
+    snapshot.derivados.tempohoras = 24 / snapshot.clinical.etapas;
+
+    if (!Number.isInteger(snapshot.derivados.tempohoras) || snapshot.derivados.tempohoras <= 0 || snapshot.derivados.tempohoras > 24) {
+      throw new Error("Horas por etapa inválidas.");
+    }
+
+    if (!isAllowedGlucose(snapshot.mistura.cs1) || !isAllowedGlucose(snapshot.mistura.cs2)) {
+      throw new Error("Os soros glicosados permitidos são: 0%, 5%, 10%, 25% e 50%.");
+    }
+
+    if (snapshot.mistura.cs1 >= snapshot.mistura.cs2) {
+      throw new Error("O 1º soro deve ter concentração menor que o 2º.");
+    }
+
+    if (snapshot.mistura.vs1 < -EPS || snapshot.mistura.vs2 < -EPS) {
+      throw new Error("Volumes dos soros não podem ser negativos.");
+    }
+  }
+
+  // A camada de apresentação só existe em formatField()/render().
+  // Nenhuma função de cálculo deve consumir valores arredondados para exibição.
+
+  function syncDerivedFromPrescription(snapshot) {
+    snapshot.derivados.tempohoras = 24 / snapshot.clinical.etapas;
+
+    // Fonte única de verdade: os derivados são calculados exclusivamente
+    // a partir dos valores brutos do snapshot, sem usar valores arredondados
+    // da camada de apresentação.
+    snapshot.derivados.volt =
+      snapshot.prescricao.volumetotal +
+      snapshot.prescricao.sodiototal +
+      snapshot.prescricao.potassiototal +
+      snapshot.prescricao.calciototal;
+
+    snapshot.derivados.mlhora = snapshot.derivados.volt / snapshot.derivados.tempohoras;
+    snapshot.derivados.volume1 = snapshot.derivados.volt * snapshot.clinical.etapas;
+    snapshot.derivados.volume2 = snapshot.derivados.volume1 / snapshot.clinical.peso;
+
+    // A mistura acompanha diretamente o volume base glicosado bruto da prescrição.
+    snapshot.mistura.volume3 = snapshot.prescricao.volumetotal;
+    snapshot.derivados.osmolaridade = computeEstimatedOsmolarity(snapshot);
+  }
+
+  function ceilToDecimals(value, decimals) {
+    var factor = Math.pow(10, decimals);
+    return Math.ceil((value - EPS) * factor) / factor;
+  }
+
+  function ensureMeta(snapshot) {
+    if (!snapshot._meta) snapshot._meta = {};
+    return snapshot._meta;
+  }
+
+  function clearMixVolumeAutoAdjustment(snapshot) {
+    ensureMeta(snapshot).mixVolumeAutoAdjustment = null;
+  }
+
+  function applyMinimumOperationalMixVolume(snapshot) {
+    var volume3 = safeNonNegative(snapshot.mistura.volume3);
+    if (volume3 <= EPS) return;
+
+    var cd = snapshot.mistura.cd;
+    var cs1 = snapshot.mistura.cs1;
+    var cs2 = snapshot.mistura.cs2;
+    var total = cs2 - cs1;
+    var minComponent = ALERT_LIMITS.mixMinimumVisibleComponentMl;
+
+    if (total <= EPS || minComponent <= EPS) return;
+    if (cd < cs1 - EPS || cd > cs2 + EPS) return;
+
+    var frac1 = (cs2 - cd) / total;
+    var frac2 = (cd - cs1) / total;
+
+    if (Math.abs(frac1) <= EPS) frac1 = 0;
+    if (Math.abs(frac2) <= EPS) frac2 = 0;
+
+    var requiredVolume = volume3;
+    var limitingComponents = [];
+    var vs1 = volume3 * frac1;
+    var vs2 = volume3 * frac2;
+
+    if (frac1 > EPS && vs1 > EPS && vs1 < minComponent - EPS) {
+      requiredVolume = Math.max(requiredVolume, minComponent / frac1);
+      limitingComponents.push("1º soro");
+    }
+
+    if (frac2 > EPS && vs2 > EPS && vs2 < minComponent - EPS) {
+      requiredVolume = Math.max(requiredVolume, minComponent / frac2);
+      limitingComponents.push("2º soro");
+    }
+
+    if (!limitingComponents.length) return;
+
+    var adjustedVolume = ceilToDecimals(requiredVolume, getFieldDecimals("volume3", snapshot));
+    if (adjustedVolume <= volume3 + EPS) return;
+
+    var maxVolumeBase = getBudgetRemainingForState(snapshot, "volumetotal");
+    if (Number.isFinite(maxVolumeBase) && adjustedVolume > maxVolumeBase + EPS) {
+      throw new Error(
+        "O volume mínimo para tornar a mistura glicosada operacional com 1 casa decimal seria " +
+        formatAlertNumber(adjustedVolume, 1) +
+        " mL por etapa, mas isso ultrapassa o limite máximo permitido para o volume hídrico total. Revisar concentração desejada, soros selecionados, número de etapas e prescrição."
+      );
+    }
+
+    var previousVolume = volume3;
+
+    snapshot.mistura.volume3 = adjustedVolume;
+    snapshot.prescricao.volumetotal = adjustedVolume;
+    syncDerivedFromPrescription(snapshot);
+    snapshot.clinical.volume = Math.round(snapshot.derivados.volume2 * 10) / 10;
+
+    ensureMeta(snapshot).mixVolumeAutoAdjustment = {
+      from: previousVolume,
+      to: adjustedVolume,
+      minComponent: minComponent,
+      components: limitingComponents.join(" e "),
+      volume2: snapshot.derivados.volume2,
+      clinicalVolume: snapshot.clinical.volume
+    };
+  }
+
+  function recomputeMixFromCd(snapshot) {
+    clearMixVolumeAutoAdjustment(snapshot);
+
+    var cd = snapshot.mistura.cd;
+    var cs1 = snapshot.mistura.cs1;
+    var cs2 = snapshot.mistura.cs2;
+    var volume3 = snapshot.mistura.volume3;
+
+    snapshot.prescricao.volumetotal = volume3;
+    syncDerivedFromPrescription(snapshot);
+
+    // O cálculo da mistura deve usar exatamente o volume bruto sincronizado com a Prescrição por Etapa.
+    volume3 = snapshot.mistura.volume3;
+
+    if (volume3 <= 0) {
+      snapshot.mistura.vs1 = 0;
+      snapshot.mistura.vs2 = 0;
+      snapshot.mistura.tig = 0;
+      return;
+    }
+
+    if (cd < cs1 - EPS || cd > cs2 + EPS) {
+      throw new Error("Concentração desejada deve estar entre os dois soros (inclusive).");
+    }
+
+    // Se a mistura resultar em componente real positivo menor que 0,1 mL,
+    // aumenta o volume base glicosado para o menor volume operacional exibível
+    // com 1 casa decimal e recalcula inversamente a taxa hídrica total.
+    applyMinimumOperationalMixVolume(snapshot);
+
+    cd = snapshot.mistura.cd;
+    cs1 = snapshot.mistura.cs1;
+    cs2 = snapshot.mistura.cs2;
+    volume3 = snapshot.mistura.volume3;
+
+    var total = cs2 - cs1;
+    var vs1 = total === 0 ? volume3 : ((cs2 - cd) * volume3) / total;
+    var vs2 = volume3 - vs1;
+
+    if (vs1 < -EPS || vs2 < -EPS) {
+      throw new Error("A mistura resultou em volume negativo.");
+    }
+
+    snapshot.mistura.vs1 = vs1;
+    snapshot.mistura.vs2 = vs2;
+    snapshot.mistura.tig = (volume3 * cd / 100 * 1000 * snapshot.clinical.etapas) / (1440 * snapshot.clinical.peso);
+    snapshot.derivados.osmolaridade = computeEstimatedOsmolarity(snapshot);
+  }
+
+  function recomputeMixFromCdWithAutoPair(snapshot) {
+    if (snapshot.mistura.volume3 <= 0) {
+      clearMixVolumeAutoAdjustment(snapshot);
+      snapshot.mistura.vs1 = 0;
+      snapshot.mistura.vs2 = 0;
+      snapshot.mistura.tig = 0;
+      return;
+    }
+
+    var pair = chooseGlucosePairForCdPreferCurrent(
+      snapshot.mistura.cd,
+      snapshot.mistura.cs1,
+      snapshot.mistura.cs2
+    );
+
+    snapshot.mistura.cs1 = pair.cs1;
+    snapshot.mistura.cs2 = pair.cs2;
+
+    recomputeMixFromCd(snapshot);
+  }
+
+  function recomputeMixFromVs(snapshot, origin) {
+    clearMixVolumeAutoAdjustment(snapshot);
+    var volume3 = snapshot.mistura.volume3;
+    snapshot.prescricao.volumetotal = volume3;
+    syncDerivedFromPrescription(snapshot);
+
+    // O volume da mistura acompanha o volume bruto do quadro Prescrição por Etapa.
+    volume3 = snapshot.mistura.volume3;
+
+    if (volume3 <= 0) throw new Error("Volume base da etapa inválido.");
+
+    if (origin === "vs1") snapshot.mistura.vs2 = volume3 - snapshot.mistura.vs1;
+    else snapshot.mistura.vs1 = volume3 - snapshot.mistura.vs2;
+
+    if (snapshot.mistura.vs1 < -EPS || snapshot.mistura.vs2 < -EPS) {
+      throw new Error("Os volumes dos soros não podem exceder o volume base.");
+    }
+
+    snapshot.mistura.cd =
+      ((snapshot.mistura.cs1 * snapshot.mistura.vs1) + (snapshot.mistura.cs2 * snapshot.mistura.vs2)) /
+      volume3;
+
+    if (snapshot.mistura.cd < snapshot.mistura.cs1 - EPS || snapshot.mistura.cd > snapshot.mistura.cs2 + EPS) {
+      throw new Error("Concentração desejada fora do intervalo entre os soros.");
+    }
+
+    snapshot.mistura.tig =
+      (volume3 * snapshot.mistura.cd / 100 * 1000 * snapshot.clinical.etapas) /
+      (1440 * snapshot.clinical.peso);
+    snapshot.derivados.osmolaridade = computeEstimatedOsmolarity(snapshot);
+  }
+
+  function computeDirect(snapshot) {
+    validateCommon(snapshot);
+
+    var peso = snapshot.clinical.peso;
+    var etapas = snapshot.clinical.etapas;
+    var volume = snapshot.clinical.volume;
+    var sodio = snapshot.clinical.sodio;
+    var potassio = snapshot.clinical.potassio;
+    var calcio = snapshot.clinical.calcio;
+    var concso = snapshot.clinical.concso;
+
+    if (volume < 0 || sodio < 0 || potassio < 0 || calcio < 0) {
+      throw new Error("Valores clínicos não podem ser negativos.");
+    }
+
+    var sodiototal = (peso * sodio) / 1.7 / etapas / concso;
+    var potassiototal = (peso * potassio) / 1.34 / etapas;
+    var calciototal = (calcio * peso) / 100 / etapas;
+
+    var eletrilitosTotal = sodiototal + potassiototal + calciototal;
+    var volumeEtapaDesejado = (peso * volume) / etapas;
+    var volumeEtapaFinal = Math.max(volumeEtapaDesejado, eletrilitosTotal);
+    var volumetotal = volumeEtapaFinal - eletrilitosTotal;
+
+    if ((volumeEtapaFinal - volumeEtapaDesejado) > 0.1) {
+      snapshot.clinical.volume = (volumeEtapaFinal * etapas) / peso;
+    }
+
+    snapshot.prescricao.concsodio = concso;
+    snapshot.prescricao.volumetotal = volumetotal;
+    snapshot.prescricao.sodiototal = sodiototal;
+    snapshot.prescricao.potassiototal = potassiototal;
+    snapshot.prescricao.calciototal = calciototal;
+
+    syncDerivedFromPrescription(snapshot);
+    recomputeMixFromCd(snapshot);
+  }
+
+  function computeInverse(snapshot) {
+    validateCommon(snapshot);
+
+    var volumetotal = snapshot.prescricao.volumetotal;
+    var sodiototal = snapshot.prescricao.sodiototal;
+    var potassiototal = snapshot.prescricao.potassiototal;
+    var calciototal = snapshot.prescricao.calciototal;
+    var concsodio = snapshot.prescricao.concsodio;
+    var peso = snapshot.clinical.peso;
+    var etapas = snapshot.clinical.etapas;
+
+    if (peso < 0.001) throw new Error("Peso muito baixo.");
+    if ([volumetotal, sodiototal, potassiototal, calciototal].some(function (v) { return v < -EPS; })) {
+      throw new Error("Volumes não podem ser negativos.");
+    }
+
+    snapshot.clinical.concso = concsodio;
+    snapshot.clinical.sodio = sodiototal * 1.7 * etapas / peso * concsodio;
+    snapshot.clinical.potassio = potassiototal * 1.34 * etapas / peso;
+    snapshot.clinical.calcio = calciototal * 100 * etapas / peso;
+
+    syncDerivedFromPrescription(snapshot);
+    snapshot.clinical.volume = Math.round(snapshot.derivados.volume2 * 10) / 10;
+    recomputeMixFromCd(snapshot);
+  }
+
+  function reverseFromVolt(snapshot) {
+    var novoSoro =
+      snapshot.derivados.volt -
+      snapshot.prescricao.sodiototal -
+      snapshot.prescricao.potassiototal -
+      snapshot.prescricao.calciototal;
+
+    if (novoSoro < -EPS) {
+      throw new Error("Volume total da etapa menor que a soma bruta dos eletrólitos.");
+    }
+
+    snapshot.prescricao.volumetotal = novoSoro;
+    computeInverse(snapshot);
+  }
+
+  function reverseFromMlhora(snapshot) {
+    snapshot.derivados.volt = snapshot.derivados.mlhora * snapshot.derivados.tempohoras;
+    reverseFromVolt(snapshot);
+  }
+
+  function reverseFromVolume1(snapshot) {
+    snapshot.derivados.volt = snapshot.derivados.volume1 / snapshot.clinical.etapas;
+    reverseFromVolt(snapshot);
+  }
+
+  function reverseFromVolume2(snapshot) {
+    snapshot.derivados.volt = (snapshot.derivados.volume2 * snapshot.clinical.peso) / snapshot.clinical.etapas;
+    reverseFromVolt(snapshot);
+  }
+
+  function reverseFromVolume3(snapshot) {
+    snapshot.prescricao.volumetotal = snapshot.mistura.volume3;
+    computeInverse(snapshot);
+  }
+
+  function reverseFromTig(snapshot) {
+    var currentMixTotal = safeNonNegative(snapshot.mistura.vs1) + safeNonNegative(snapshot.mistura.vs2);
+    var preservedVolume = currentMixTotal > EPS ? currentMixTotal : safeNonNegative(snapshot.mistura.volume3);
+
+    if (preservedVolume <= 0) {
+      throw new Error("Volume base da etapa inválido.");
+    }
+
+    snapshot.mistura.volume3 = preservedVolume;
+    snapshot.prescricao.volumetotal = preservedVolume;
+    syncDerivedFromPrescription(snapshot);
+
+    // A TIG reversa deve partir do volume bruto sincronizado entre os dois quadros.
+    preservedVolume = snapshot.mistura.volume3;
+
+    snapshot.mistura.cd =
+      (snapshot.mistura.tig * 1440 * snapshot.clinical.peso) /
+      (preservedVolume * snapshot.clinical.etapas * 10);
+
+    var pair = chooseGlucosePairForCdPreferCurrent(
+      snapshot.mistura.cd,
+      snapshot.mistura.cs1,
+      snapshot.mistura.cs2
+    );
+
+    snapshot.mistura.cs1 = pair.cs1;
+    snapshot.mistura.cs2 = pair.cs2;
+
+    recomputeMixFromCd(snapshot);
+  }
+
+  function validateInvariants(snapshot) {
+    validateCommon(snapshot);
+
+    if (Math.abs(snapshot.mistura.volume3 - snapshot.prescricao.volumetotal) > 1e-6) {
+      throw new Error("Invariante violada: volume base da mistura deve acompanhar o volume base bruto da prescrição.");
+    }
+
+    var sumVolt =
+      snapshot.prescricao.volumetotal +
+      snapshot.prescricao.sodiototal +
+      snapshot.prescricao.potassiototal +
+      snapshot.prescricao.calciototal;
+
+    if (Math.abs(snapshot.derivados.volt - sumVolt) > 1e-6) {
+      throw new Error("Invariante violada: volume total da etapa deve ser a soma dos valores brutos da prescrição.");
+    }
+
+    if (Math.abs(snapshot.derivados.volume1 - (snapshot.derivados.volt * snapshot.clinical.etapas)) > 1e-6) {
+      throw new Error("Invariante violada: volume 24h inconsistente.");
+    }
+
+    if (Math.abs(snapshot.derivados.volume2 - (snapshot.derivados.volume1 / snapshot.clinical.peso)) > 1e-6) {
+      throw new Error("Invariante violada: taxa hídrica inconsistente.");
+    }
+
+    if (Math.abs(snapshot.derivados.mlhora - (snapshot.derivados.volt / snapshot.derivados.tempohoras)) > 1e-6) {
+      throw new Error("Invariante violada: mL/h inconsistente.");
+    }
+
+    if (Math.abs((snapshot.mistura.vs1 + snapshot.mistura.vs2) - snapshot.mistura.volume3) > 1e-6) {
+      throw new Error("Invariante violada: vs1 + vs2 deve ser igual ao volume base.");
+    }
+
+    if (snapshot.mistura.cd < snapshot.mistura.cs1 - EPS || snapshot.mistura.cd > snapshot.mistura.cs2 + EPS) {
+      throw new Error("Concentração desejada fora do intervalo entre os soros.");
+    }
+
+    if (Math.abs(snapshot.derivados.osmolaridade - computeEstimatedOsmolarity(snapshot)) > 1e-6) {
+      throw new Error("Invariante violada: osmolaridade estimada inconsistente.");
+    }
+  }
+
+
+  function formatAlertNumber(value, decimals) {
+    if (!Number.isFinite(value)) return "";
+    return round(value, 1).toFixed(1).replace(".", ",");
+  }
+  function formatOsmolarityMinimumVolumeText(snapshot, targetOsmolarity, peso, etapas) {
+    var targetPerMl = safeNonNegative(targetOsmolarity) / 1000;
+    if (targetPerMl <= EPS) return "";
+
+    var volumeGlicoseMl = safeNonNegative(snapshot.mistura.volume3);
+    var concentracaoGlicosePercent = safeNonNegative(snapshot.mistura.cd);
+    var hasGlicoseCalculada = volumeGlicoseMl > EPS && concentracaoGlicosePercent > EPS;
+    var glicoseMosmPorMl = hasGlicoseCalculada ? (concentracaoGlicosePercent * 10) / DEXTROSE_MONOHYDRATE_MW : 0;
+
+    var concSodio = safeNonNegative(snapshot.prescricao.concsodio || snapshot.clinical.concso || 2);
+    var sodioMeq = safeNonNegative(snapshot.prescricao.sodiototal) * 1.7 * concSodio;
+    var potassioMeq = safeNonNegative(snapshot.prescricao.potassiototal) * 1.34;
+    var calcioVolumeMl = safeNonNegative(snapshot.prescricao.calciototal);
+
+    var volumeAditivosMl =
+      safeNonNegative(snapshot.prescricao.sodiototal) +
+      safeNonNegative(snapshot.prescricao.potassiototal) +
+      calcioVolumeMl;
+
+    var osmolesFixos =
+      (sodioMeq * 2) +
+      (potassioMeq * 2) +
+      (calcioVolumeMl * 0.66);
+
+    if (hasGlicoseCalculada && glicoseMosmPorMl >= targetPerMl - EPS) {
+      return (
+        " Mantendo a mesma concentração de glicose desejada, não há volume total finito capaz de reduzir a osmolaridade estimada até " +
+        formatAlertNumber(targetOsmolarity, 0) +
+        " mOsm/L; seria necessário reduzir a concentração de glicose e/ou a carga de solutos."
+      );
+    }
+
+    var numerador = osmolesFixos - (glicoseMosmPorMl * volumeAditivosMl);
+    var denominador = targetPerMl - glicoseMosmPorMl;
+    var volumeMinimoOsm = numerador / denominador;
+
+    if (!Number.isFinite(volumeMinimoOsm) || volumeMinimoOsm <= EPS) {
+      return " Não foi possível estimar com segurança o volume mínimo apenas a partir da osmolaridade calculada.";
+    }
+
+    volumeMinimoOsm = Math.max(volumeMinimoOsm, volumeAditivosMl);
+    var taxaMinimaOsm = (peso > EPS && etapas > 0) ? (volumeMinimoOsm * etapas) / peso : 0;
+    var contextoOsmolaridade = hasGlicoseCalculada
+      ? " Mantendo a mesma concentração de glicose desejada e as mesmas cargas de eletrólitos, o volume total estimado da solução precisaria ser de pelo menos "
+      : " Mantendo as mesmas cargas de eletrólitos, o volume total estimado da solução precisaria ser de pelo menos ";
+    var componentesOsmolaridade = hasGlicoseCalculada
+      ? "glicose, NaCl, KCl ou gluconato de cálcio"
+      : "NaCl, KCl ou gluconato de cálcio";
+
+    return (
+      contextoOsmolaridade +
+      formatAlertNumber(volumeMinimoOsm, 1) +
+      " mL por etapa" +
+      (taxaMinimaOsm > 0 ? ", equivalente a " + formatAlertNumber(taxaMinimaOsm, 1) + " mL/kg/dia de volume hídrico total" : "") +
+      ", para atingir essa referência. Esse valor é uma estimativa físico-química e não corresponde ao volume de " +
+      componentesOsmolaridade +
+      "."
+    );
+  }
+
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function getElectrolyteOsmolarityAlertMessages(snapshot) {
+    var messages = [];
+    var volumeFinalMl = safeNonNegative(snapshot.derivados.volt);
+
+    if (volumeFinalMl <= EPS) return messages;
+
+    var volumeFinalL = volumeFinalMl / 1000;
+    var peso = safeNonNegative(snapshot.clinical.peso);
+    var etapas = safeNonNegative(snapshot.clinical.etapas);
+
+    var concSodio = safeNonNegative(snapshot.prescricao.concsodio || snapshot.clinical.concso || 2);
+    var sodioMeq = safeNonNegative(snapshot.prescricao.sodiototal) * 1.7 * concSodio;
+    var potassioMeq = safeNonNegative(snapshot.prescricao.potassiototal) * 1.34;
+    var calcioGluconatoMg = safeNonNegative(snapshot.prescricao.calciototal) * 100;
+    var osmolaridade = safeNonNegative(snapshot.derivados.osmolaridade);
+
+    var sodioFinalMeqL = sodioMeq / volumeFinalL;
+    var potassioFinalMeqL = potassioMeq / volumeFinalL;
+    var calcioGluconatoMgMl = calcioGluconatoMg / volumeFinalMl;
+
+    var limitePotassio = ALERT_LIMITS.potassiumConcentration;
+    var referenciaSodioIsotonico = ALERT_LIMITS.sodiumIsotonicReference;
+
+    if (isPrecisionMode(snapshot)) {
+      messages.push(
+        "Modo precisão ativado para peso < 1,5 kg: os volumes de NaCl, KCl e gluconato de cálcio são exibidos com 2 casas decimais para reduzir erro proporcional por arredondamento. O volume base glicosado por etapa permanece com 1 casa decimal."
+      );
+    }
+
+    if (potassioMeq > EPS && potassioFinalMeqL > limitePotassio + EPS) {
+      var volumeMinimoK = (potassioMeq / limitePotassio) * 1000;
+      var taxaMinimaK = (peso > EPS && etapas > 0) ? (volumeMinimoK * etapas) / peso : 0;
+
+      messages.push(
+        "Potássio elevado: concentração final estimada de " +
+        formatAlertNumber(potassioFinalMeqL, 1) +
+        " mEq/L, acima da referência conservadora de " +
+        formatAlertNumber(limitePotassio, 0) +
+        " mEq/L. Para diluir a dose de potássio prescrita até 40 mEq/L, o volume total da solução precisaria ser de pelo menos " +
+        formatAlertNumber(volumeMinimoK, 1) +
+        " mL por etapa" +
+        (taxaMinimaK > 0 ? ", equivalente a " + formatAlertNumber(taxaMinimaK, 1) + " mL/kg/dia de volume hídrico total." : ".") +
+        " Esse valor não corresponde ao volume de KCl. Revisar dose de K, volume final, número de etapas, velocidade de infusão, monitorização, via de infusão e protocolo institucional."
+      );
+    }
+
+    if (sodioMeq > EPS && sodioFinalMeqL > referenciaSodioIsotonico + EPS) {
+      var volumeMinimoNa = (sodioMeq / referenciaSodioIsotonico) * 1000;
+      var taxaMinimaNa = (peso > EPS && etapas > 0) ? (volumeMinimoNa * etapas) / peso : 0;
+
+      messages.push(
+        "Sódio elevado: concentração final estimada de " +
+        formatAlertNumber(sodioFinalMeqL, 1) +
+        " mEq/L, acima da referência isotônica de " +
+        formatAlertNumber(referenciaSodioIsotonico, 0) +
+        " mEq/L. Para diluir a carga de sódio prescrita até a referência isotônica de 154 mEq/L, o volume total da solução precisaria ser de pelo menos " +
+        formatAlertNumber(volumeMinimoNa, 1) +
+        " mL por etapa" +
+        (taxaMinimaNa > 0 ? ", equivalente a " + formatAlertNumber(taxaMinimaNa, 1) + " mL/kg/dia de volume hídrico total." : ".") +
+        " Esse valor não corresponde ao volume de NaCl. Revisar indicação, sódio sérico, volume final, número de etapas, osmolaridade final, velocidade de infusão, via de infusão e protocolo institucional."
+      );
+    }
+
+    if (calcioGluconatoMg > EPS && calcioGluconatoMgMl > ALERT_LIMITS.calciumBolusMaxMgMl + EPS) {
+      var volumeMinimoCaBolus = calcioGluconatoMg / ALERT_LIMITS.calciumBolusMaxMgMl;
+      var taxaMinimaCaBolus = (peso > EPS && etapas > 0) ? (volumeMinimoCaBolus * etapas) / peso : 0;
+
+      messages.push(
+        "Gluconato de cálcio muito concentrado: concentração final estimada de " +
+        formatAlertNumber(calcioGluconatoMgMl, 1) +
+        " mg/mL de gluconato de cálcio na solução. Esse valor está acima de 50 mg/mL, concentração máxima descrita para bolus diluído, e é inadequado como referência para infusão contínua. Para ficar em até 50 mg/mL, o volume total da solução precisaria ser de pelo menos " +
+        formatAlertNumber(volumeMinimoCaBolus, 1) +
+        " mL por etapa" +
+        (taxaMinimaCaBolus > 0 ? ", equivalente a " + formatAlertNumber(taxaMinimaCaBolus, 1) + " mL/kg/dia de volume hídrico total." : ".") +
+        " Esse valor não corresponde ao volume de gluconato de cálcio. Revisar dose, volume final, velocidade de infusão, cálcio sérico/ionizado, compatibilidades, risco de extravasamento, via de infusão e protocolo institucional."
+      );
+    } else if (calcioGluconatoMg > EPS && calcioGluconatoMgMl > ALERT_LIMITS.calciumContinuousMaxMgMl + EPS) {
+      var volumeMinimoCaContinuo = calcioGluconatoMg / ALERT_LIMITS.calciumContinuousMaxMgMl;
+      var taxaMinimaCaContinuo = (peso > EPS && etapas > 0) ? (volumeMinimoCaContinuo * etapas) / peso : 0;
+
+      messages.push(
+        "Gluconato de cálcio concentrado: concentração final estimada de " +
+        formatAlertNumber(calcioGluconatoMgMl, 1) +
+        " mg/mL de gluconato de cálcio na solução. Para infusão contínua, referências de bula descrevem diluição usual até 10 mg/mL. Para ficar em até 10 mg/mL, o volume total da solução precisaria ser de pelo menos " +
+        formatAlertNumber(volumeMinimoCaContinuo, 1) +
+        " mL por etapa" +
+        (taxaMinimaCaContinuo > 0 ? ", equivalente a " + formatAlertNumber(taxaMinimaCaContinuo, 1) + " mL/kg/dia de volume hídrico total." : ".") +
+        " Esse valor não corresponde ao volume de gluconato de cálcio. Revisar dose, volume final, velocidade de infusão, cálcio sérico/ionizado, compatibilidades, risco de extravasamento, via de infusão e protocolo institucional."
+      );
+    }
+
+    if (volumeFinalMl > EPS && osmolaridade < ALERT_LIMITS.osmLow - EPS) {
+      messages.push(
+        "Osmolaridade reduzida / solução hipotônica: osmolaridade estimada de " +
+        formatAlertNumber(osmolaridade, 0) +
+        " mOsm/L, abaixo da referência conservadora de " +
+        formatAlertNumber(ALERT_LIMITS.osmLow, 0) +
+        " mOsm/L. Soluções muito hipotônicas podem promover entrada de água nas células, edema celular e hemólise, especialmente em infusão rápida, via periférica ou contato com sangue/hemoderivados. Revisar composição da solução, concentração de glicose, eletrólitos, volume final, velocidade de infusão, via de infusão e protocolo institucional antes de infundir."
+      );
+    } else if (osmolaridade >= ALERT_LIMITS.osmHigh - EPS) {
+      messages.push(
+        "Osmolaridade aumentada: osmolaridade estimada de " +
+        formatAlertNumber(osmolaridade, 0) +
+        " mOsm/L, acima da referência conservadora de " +
+        formatAlertNumber(ALERT_LIMITS.osmHigh, 0) +
+        " mOsm/L." +
+        formatOsmolarityMinimumVolumeText(snapshot, ALERT_LIMITS.osmHigh, peso, etapas) +
+        " Revisar concentração de glicose, eletrólitos, volume final, velocidade de infusão, via de infusão, compatibilidades e protocolo institucional."
+      );
+    } else if (osmolaridade >= ALERT_LIMITS.osmPeripheralCaution - EPS) {
+      messages.push(
+        "Osmolaridade limítrofe/elevada: osmolaridade estimada de " +
+        formatAlertNumber(osmolaridade, 0) +
+        " mOsm/L, acima da referência de alerta de " +
+        formatAlertNumber(ALERT_LIMITS.osmPeripheralCaution, 0) +
+        " mOsm/L." +
+        formatOsmolarityMinimumVolumeText(snapshot, ALERT_LIMITS.osmPeripheralCaution, peso, etapas) +
+        " Revisar concentração de glicose, eletrólitos, volume final, velocidade de infusão, via de infusão, compatibilidades e protocolo institucional."
+      );
+    }
+
+    if (
+      safeNonNegative(snapshot.prescricao.volumetotal) <= EPS &&
+      (sodioMeq > EPS || potassioMeq > EPS || calcioGluconatoMg > EPS)
+    ) {
+      messages.push(
+        "Volume base SG por etapa igual a zero. A etapa calculada ficou composta apenas por eletrólitos; revisar a adequação do volume final, osmolaridade e segurança da infusão."
+      );
+    }
+
+    return messages;
+  }
+
+  function getMixAutoAdjustmentAlertMessages(snapshot) {
+    var messages = [];
+    var adjustment = snapshot._meta && snapshot._meta.mixVolumeAutoAdjustment;
+
+    if (adjustment) {
+      messages.push(
+        "Volume base glicosado aumentado automaticamente: a mistura calculada tinha " +
+        adjustment.components +
+        " com volume positivo menor que " +
+        formatAlertNumber(adjustment.minComponent, 1) +
+        " mL. Para manter a exibição com 1 casa decimal e tornar a mistura operacionalmente representável, o volume base foi aumentado de " +
+        formatAlertNumber(adjustment.from, 1) +
+        " mL para " +
+        formatAlertNumber(adjustment.to, 1) +
+        " mL por etapa. A taxa hídrica total e a TIG foram recalculadas."
+      );
+    }
+
+    return messages;
+  }
+
+  function getGlucoseTigAlertMessages(snapshot) {
+    var messages = [];
+
+    var volumeGlicoseMl = safeNonNegative(snapshot.mistura.volume3);
+    if (volumeGlicoseMl <= EPS) return messages;
+
+    var glicosePercentual = safeNonNegative(snapshot.mistura.cd);
+    var tig = safeNonNegative(snapshot.mistura.tig);
+
+    if (glicosePercentual > ALERT_LIMITS.glucoseConcentrated + EPS) {
+      messages.push(
+        "Glicose concentrada: concentração desejada de " +
+        formatAlertNumber(glicosePercentual, 1) +
+        "%. Concentrações acima de " +
+        formatAlertNumber(ALERT_LIMITS.glucoseConcentrated, 1) +
+        "% exigem revisão da osmolaridade, glicemia, compatibilidade, velocidade de infusão e via de acesso; em geral, evitar acesso periférico de rotina e considerar acesso central ou umbilical com ponta central confirmada conforme protocolo institucional."
+      );
+    } else if (glicosePercentual > ALERT_LIMITS.glucosePeripheralCaution + EPS) {
+      messages.push(
+        "Glicose acima de 10%: concentração desejada de " +
+        formatAlertNumber(glicosePercentual, 1) +
+        "%. Revisar osmolaridade final, sítio venoso, risco de flebite/extravasamento, glicemia e protocolo institucional."
+      );
+    }
+
+    if (tig > ALERT_LIMITS.tigVeryHigh + EPS) {
+      messages.push(
+        "TIG muito elevada: " +
+        formatAlertNumber(tig, 2) +
+        " mg/kg/min. Revisar glicemia, idade gestacional, dia de vida, necessidade metabólica, concentração de glicose, volume, velocidade de infusão e protocolo institucional."
+      );
+    } else if (tig > ALERT_LIMITS.tigHigh + EPS) {
+      messages.push(
+        "TIG elevada: " +
+        formatAlertNumber(tig, 2) +
+        " mg/kg/min. Correlacionar com glicemia, prematuridade, dia de vida, necessidade metabólica, concentração de glicose, volume e segurança da infusão."
+      );
+    }
+
+    return messages;
+  }
+
+  function getSolutionAlertMessages(snapshot) {
+    return getElectrolyteOsmolarityAlertMessages(snapshot)
+      .concat(getMixAutoAdjustmentAlertMessages(snapshot))
+      .concat(getGlucoseTigAlertMessages(snapshot));
+  }
+
+  function renderAlertList(elementId, messages, title) {
+    var alertElement = document.getElementById(elementId);
+    if (!alertElement) return;
+
+    if (!messages.length) {
+      alertElement.classList.add("is-hidden");
+      alertElement.innerHTML = "";
+      return;
+    }
+
+    alertElement.classList.remove("is-hidden");
+    alertElement.innerHTML =
+      "<strong>" + escapeHtml(title) + "</strong>" +
+      "<ul><li>" +
+      messages.map(escapeHtml).join("</li><li>") +
+      "</li></ul>";
+  }
+
+  function render(snapshot, options) {
+    updating = true;
+
+    var skipName = options && options.skipName;
+
+    Object.keys(FIELD_META).forEach(function (name) {
+      if (!form[name]) return;
+
+      var rawValue = getByPath(snapshot, FIELD_META[name].path);
+      var displayValue = formatField(name, rawValue, snapshot);
+
+      // Renderização passiva: transforma número bruto em string exibida,
+      // sem recalcular, sem reler o DOM e sem alterar o snapshot.
+      // Durante digitação contínua, preserva apenas o campo ativo para não
+      // transformar "7" em "7.0" antes do usuário terminar de digitar.
+      if (name !== skipName) {
+        form[name].value = displayValue;
+      }
+      form[name].dataset.role = FIELD_META[name].role;
+      form[name].title = getFieldRoleTitle(FIELD_META[name].role);
+
+      if (name === "tempohoras" || name === "osmolaridade") {
+        form[name].readOnly = true;
+        form[name].tabIndex = -1;
+      }
+    });
+
+    renderAlertList(
+      "alertaSolucao",
+      getElectrolyteOsmolarityAlertMessages(snapshot),
+      "ALERTAS CLÍNICOS"
+    );
+    renderAlertList(
+      "alertaAjusteAutomaticoMistura",
+      getMixAutoAdjustmentAlertMessages(snapshot),
+      "AJUSTE AUTOMÁTICO DA MISTURA"
+    );
+    renderAlertList(
+      "alertaMistura",
+      getGlucoseTigAlertMessages(snapshot),
+      "ALERTAS CLÍNICOS"
+    );
+
+    updating = false;
+  }
+
+  function commit(candidate, renderOptions) {
+    validateInvariants(candidate);
+    state = candidate;
+    render(state, renderOptions);
+  }
+
+  function atomic(mutator, renderOptions) {
+    var candidate = deepClone(state);
+    mutator(candidate);
+    commit(candidate, renderOptions);
+  }
+
+  function hideErrorToast() {
+    errorToast.classList.remove("show");
+  }
+
+  function showErrorToast(message) {
+    errorToastMessage.textContent = message || "Ocorreu um erro inesperado.";
+    errorToast.classList.remove("show");
+    void errorToast.offsetWidth;
+    errorToast.classList.add("show");
+    clearTimeout(errorToastHideTimer);
+    errorToastHideTimer = setTimeout(hideErrorToast, TOAST_DURATION_MS);
+  }
+
+  function fail(error, preserveForm) {
+    if (!preserveForm) render(state);
+    showErrorToast(error && error.message ? error.message : String(error));
+  }
+
+  var INTENT = {
+    DIRECT: "direct",
+    INVERSE: "inverse",
+    REVERSE_VOLT: "reverse-volt",
+    REVERSE_MLHORA: "reverse-mlhora",
+    REVERSE_VOLUME1: "reverse-volume1",
+    REVERSE_VOLUME2: "reverse-volume2",
+    REVERSE_VOLUME3: "reverse-volume3",
+    MIX_CD: "mix-cd",
+    MIX_VS1: "mix-vs1",
+    MIX_VS2: "mix-vs2",
+    REVERSE_TIG: "reverse-tig"
+  };
+
+  function getIntentForField(name) {
+    if (["peso", "etapas", "volume", "sodio", "potassio", "calcio", "concso"].indexOf(name) >= 0) return INTENT.DIRECT;
+    if (["volumetotal", "sodiototal", "potassiototal", "calciototal", "concsodio", "peso1", "etapas2"].indexOf(name) >= 0) return INTENT.INVERSE;
+    if (name === "volt") return INTENT.REVERSE_VOLT;
+    if (name === "mlhora") return INTENT.REVERSE_MLHORA;
+    if (name === "volume1") return INTENT.REVERSE_VOLUME1;
+    if (name === "volume2") return INTENT.REVERSE_VOLUME2;
+    if (name === "volume3") return INTENT.REVERSE_VOLUME3;
+    if (name === "cd" || name === "cs1" || name === "cs2") return INTENT.MIX_CD;
+    if (name === "vs1") return INTENT.MIX_VS1;
+    if (name === "vs2") return INTENT.MIX_VS2;
+    if (name === "tig") return INTENT.REVERSE_TIG;
+    throw new Error("Campo não mapeado.");
+  }
+
+  function computeByIntent(snapshot, intent) {
+    switch (intent) {
+      case INTENT.DIRECT:
+        computeDirect(snapshot);
+        return;
+      case INTENT.INVERSE:
+        computeInverse(snapshot);
+        return;
+      case INTENT.REVERSE_VOLT:
+        reverseFromVolt(snapshot);
+        return;
+      case INTENT.REVERSE_MLHORA:
+        reverseFromMlhora(snapshot);
+        return;
+      case INTENT.REVERSE_VOLUME1:
+        reverseFromVolume1(snapshot);
+        return;
+      case INTENT.REVERSE_VOLUME2:
+        reverseFromVolume2(snapshot);
+        return;
+      case INTENT.REVERSE_VOLUME3:
+        reverseFromVolume3(snapshot);
+        return;
+      case INTENT.MIX_CD:
+        recomputeMixFromCdWithAutoPair(snapshot);
+        return;
+      case INTENT.MIX_VS1:
+        sanitizeFieldInState("vs1", snapshot);
+        recomputeMixFromVs(snapshot, "vs1");
+        return;
+      case INTENT.MIX_VS2:
+        sanitizeFieldInState("vs2", snapshot);
+        recomputeMixFromVs(snapshot, "vs2");
+        return;
+      case INTENT.REVERSE_TIG:
+        reverseFromTig(snapshot);
+        return;
+      default:
+        throw new Error("Intenção de cálculo não mapeada.");
+    }
+  }
+
+  function updateFromUserField(name, rawValue, renderOptions) {
+    if (!FIELD_META[name]) throw new Error("Campo não mapeado.");
+
+    var parsed = parseDecimal(rawValue);
+    if (!Number.isFinite(parsed)) {
+      throw new Error("Valor numérico inválido.");
+    }
+
+    atomic(function (candidate) {
+      setByPath(candidate, FIELD_META[name].path, parsed);
+      sanitizeFieldInState(name, candidate);
+      computeByIntent(candidate, getIntentForField(name));
+    }, renderOptions);
+  }
+
+  function recalculateFromCurrentState(intent) {
+    atomic(function (candidate) {
+      computeByIntent(candidate, intent);
+    });
+  }
+
+  function setSectionOpen(sectionId, isOpen) {
+    var section = document.getElementById(sectionId);
+    if (!section) return;
+    section.classList.toggle("is-collapsed", !isOpen);
+    var header = section.querySelector ? section.querySelector(".secao-header") : null;
+    if (header) header.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+
+  function toggleSectionOpen(sectionId) {
+    var section = document.getElementById(sectionId);
+    if (!section) return;
+    setSectionOpen(sectionId, section.classList.contains("is-collapsed"));
+  }
+
+  function initializeCollapsibleSections() {
+    ["secaoParametros", "secaoPrescricao"].forEach(function (sectionId) {
+      var section = document.getElementById(sectionId);
+      if (!section) return;
+      section.classList.add("secao-js-collapsible");
+      var header = section.querySelector ? section.querySelector(".secao-header") : null;
+      if (!header || header.dataset.collapsibleBound === "true") return;
+      header.dataset.collapsibleBound = "true";
+      header.setAttribute("role", "button");
+      header.setAttribute("tabindex", "0");
+      header.addEventListener("click", function () { toggleSectionOpen(sectionId); });
+      header.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        toggleSectionOpen(sectionId);
+      });
+      setSectionOpen(sectionId, true);
+    });
+
+    var mistura = document.getElementById("secaoMistura");
+    if (mistura) mistura.open = true;
+  }
+
+  function scrollPrescriptionToTop() {
+    var section = document.getElementById("secaoPrescricao");
+    if (!section) return;
+    setSectionOpen("secaoPrescricao", true);
+    var scrollAction = function () {
+      if (typeof section.scrollIntoView === "function") {
+        section.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+      }
+    };
+    if (typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(scrollAction);
+    } else {
+      setTimeout(scrollAction, 0);
+    }
+  }
+
+  function bindFieldEvents() {
+    Object.keys(FIELD_META).forEach(function (name) {
+      var el = form[name];
+      if (!el || name === "tempohoras" || name === "osmolaridade") return;
+
+      var triggerFieldUpdate = function (options) {
+        if (updating) return;
+        var soft = !!(options && options.soft);
+        var parsed = parseDecimal(el.value);
+
+        if (!Number.isFinite(parsed)) {
+          if (!soft) render(state);
+          return;
+        }
+
+        try {
+          updateFromUserField(name, el.value, soft ? { skipName: name } : null);
+        } catch (error) {
+          fail(error, true);
+        }
+      };
+
+      if (el.tagName === "SELECT") {
+        // Selects confirmam a intenção no próprio change.
+        el.addEventListener("change", function () { triggerFieldUpdate({ soft: false }); });
+      } else {
+        // Campos digitáveis não recalculam durante a digitação.
+        // O cálculo é confirmado apenas ao sair do campo.
+        el.addEventListener("blur", function () { triggerFieldUpdate({ soft: false }); });
+      }
+    });
+
+    form.addEventListener("reset", function (event) {
+      event.preventDefault();
+      try {
+        var candidate = deepClone(initialRawState || createStateFromForm());
+        computeDirect(candidate);
+        commit(candidate);
+      } catch (error) {
+        fail(error, false);
+      }
+    });
+  }
+
+  function assertAlmostEqual(actual, expected, message) {
+    if (Math.abs(actual - expected) > 1e-6) {
+      throw new Error(message + " | esperado: " + expected + " | obtido: " + actual);
+    }
+  }
+
+  function createKnownGoodState() {
+    var snapshot = {
+      clinical: {
+        peso: 3,
+        etapas: 1,
+        volume: 70,
+        sodio: 3.4,
+        potassio: 1.3,
+        calcio: 150,
+        concso: 2,
+      },
+      prescricao: {
+        volumetotal: 0,
+        sodiototal: 0,
+        potassiototal: 0,
+        calciototal: 0,
+        concsodio: 2
+      },
+      derivados: {
+        volt: 0,
+        tempohoras: 24,
+        mlhora: 0,
+        osmolaridade: 0,
+        volume1: 0,
+        volume2: 0
+      },
+      mistura: {
+        volume3: 0,
+        cd: 7.5,
+        cs1: 5,
+        cs2: 10,
+        vs1: 0,
+        vs2: 0,
+        tig: 0
+      }
+    };
+    computeDirect(snapshot);
+    validateInvariants(snapshot);
+    return snapshot;
+  }
+
+  function runSelfTests() {
+    var tests = [];
+
+    function assertThrows(fn, messageFragment) {
+      var threw = false;
+      try {
+        fn();
+      } catch (error) {
+        threw = true;
+        if (messageFragment && String(error.message || error).indexOf(messageFragment) === -1) {
+          throw new Error("Mensagem de erro inesperada: " + (error.message || error));
+        }
+      }
+      if (!threw) {
+        throw new Error("Era esperado erro e a função não falhou.");
+      }
+    }
+
+    tests.push(function testDirectCalculation() {
+      var snapshot = createKnownGoodState();
+      assertAlmostEqual(snapshot.prescricao.sodiototal, 3, "NaCl por etapa");
+      assertAlmostEqual(snapshot.prescricao.potassiototal, 2.91044776119403, "KCl por etapa");
+      assertAlmostEqual(snapshot.prescricao.calciototal, 4.5, "Cálcio por etapa");
+      assertAlmostEqual(
+        snapshot.derivados.volt,
+        snapshot.prescricao.volumetotal + snapshot.prescricao.sodiototal + snapshot.prescricao.potassiototal + snapshot.prescricao.calciototal,
+        "Volume total da etapa pela soma bruta"
+      );
+      assertAlmostEqual(
+        snapshot.derivados.volume2,
+        (snapshot.derivados.volt * snapshot.clinical.etapas) / snapshot.clinical.peso,
+        "Taxa hídrica total em função do volume total bruto"
+      );
+      if (!(snapshot.derivados.osmolaridade > 0)) {
+        throw new Error("Osmolaridade estimada deve ser maior que zero.");
+      }
+      assertAlmostEqual(snapshot.mistura.vs1 + snapshot.mistura.vs2, snapshot.mistura.volume3, "Mistura fecha o volume");
+    });
+
+    tests.push(function testDextroseMonohydrateOsmolarity() {
+      var snapshot = createKnownGoodState();
+      snapshot.prescricao.sodiototal = 0;
+      snapshot.prescricao.potassiototal = 0;
+      snapshot.prescricao.calciototal = 0;
+      snapshot.prescricao.volumetotal = 100;
+      snapshot.mistura.volume3 = 100;
+      snapshot.mistura.cd = 5;
+      snapshot.derivados.volt = 100;
+      snapshot.derivados.osmolaridade = computeEstimatedOsmolarity(snapshot);
+      assertAlmostEqual(snapshot.derivados.osmolaridade, 252.3086239087652, "D5 pela dextrose monohidratada");
+    });
+
+    tests.push(function testOneDecimalVisibleFormatting() {
+      var snapshot = createKnownGoodState();
+      if (formatField("peso", snapshot.clinical.peso, snapshot) !== "3.0") throw new Error("Peso deve exibir 1 casa decimal.");
+      if (formatField("volumetotal", snapshot.prescricao.volumetotal, snapshot).split(".")[1].length !== 1) throw new Error("Volume base glicosado por etapa deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (formatField("volume3", snapshot.mistura.volume3, snapshot).split(".")[1].length !== 1) throw new Error("Volume base da mistura deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (Math.abs(snapshot.mistura.volume3 - snapshot.prescricao.volumetotal) > 1e-6) throw new Error("Volume base da mistura deve ser igual ao volume bruto da prescrição.");
+      if (formatField("sodiototal", snapshot.prescricao.sodiototal, snapshot).split(".")[1].length !== 1) throw new Error("Sódio deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (formatField("potassiototal", snapshot.prescricao.potassiototal, snapshot).split(".")[1].length !== 1) throw new Error("Potássio deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (formatField("calciototal", snapshot.prescricao.calciototal, snapshot).split(".")[1].length !== 1) throw new Error("Cálcio deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (Math.abs(snapshot.derivados.volt - (snapshot.prescricao.volumetotal + snapshot.prescricao.sodiototal + snapshot.prescricao.potassiototal + snapshot.prescricao.calciototal)) > 1e-6) throw new Error("Volume Total da Etapa deve ser a soma dos valores brutos.");
+      if (Math.abs(snapshot.derivados.mlhora - (snapshot.derivados.volt / snapshot.derivados.tempohoras)) > 1e-6) throw new Error("mL/hora deve ser calculado a partir do Volume Total da Etapa bruto.");
+      if (formatField("volt", snapshot.derivados.volt, snapshot).split(".")[1].length !== 2) throw new Error("Volume Total da Etapa deve manter 2 casas decimais.");
+      if (formatField("mlhora", snapshot.derivados.mlhora, snapshot).split(".")[1].length !== 1) throw new Error("mL/h deve exibir 1 casa decimal.");
+      if (formatField("osmolaridade", snapshot.derivados.osmolaridade, snapshot).split(".")[1].length !== 1) throw new Error("Osmolaridade deve exibir 1 casa decimal.");
+      if (formatField("tig", snapshot.mistura.tig, snapshot).split(".")[1].length !== 1) throw new Error("TIG deve exibir 1 casa decimal.");
+      if (formatAlertNumber(40, 0) !== "40,0") throw new Error("Alertas devem exibir 1 casa decimal.");
+    });
+
+    tests.push(function testPrecisionModeForWeightBelowOnePointFive() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.peso = 1.2;
+      snapshot.clinical.volume = 80;
+      snapshot.clinical.sodio = 3;
+      snapshot.clinical.potassio = 2;
+      snapshot.clinical.calcio = 100;
+      computeDirect(snapshot);
+
+      if (!isPrecisionMode(snapshot)) throw new Error("Modo precisão deveria estar ativo para peso < 1,5 kg.");
+      if (formatField("volumetotal", snapshot.prescricao.volumetotal, snapshot).split(".")[1].length !== 1) throw new Error("Volume base deve exibir 1 casa decimal no modo precisão.");
+      if (formatField("volume3", snapshot.mistura.volume3, snapshot).split(".")[1].length !== 1) throw new Error("Volume base da mistura deve exibir 1 casa decimal no modo precisão.");
+      if (Math.abs(snapshot.mistura.volume3 - snapshot.prescricao.volumetotal) > 1e-6) throw new Error("Volume base da mistura deve ser igual ao volume bruto da prescrição no modo precisão.");
+      if (formatField("sodiototal", snapshot.prescricao.sodiototal, snapshot).split(".")[1].length !== 2) throw new Error("Sódio deve exibir 2 casas decimais no modo precisão.");
+      if (formatField("potassiototal", snapshot.prescricao.potassiototal, snapshot).split(".")[1].length !== 2) throw new Error("Potássio deve exibir 2 casas decimais no modo precisão.");
+      if (formatField("calciototal", snapshot.prescricao.calciototal, snapshot).split(".")[1].length !== 2) throw new Error("Cálcio deve exibir 2 casas decimais no modo precisão.");
+      if (Math.abs(snapshot.derivados.volt - (snapshot.prescricao.volumetotal + snapshot.prescricao.sodiototal + snapshot.prescricao.potassiototal + snapshot.prescricao.calciototal)) > 1e-6) throw new Error("Volume Total deve somar os valores brutos no modo precisão.");
+      if (Math.abs(snapshot.derivados.mlhora - (snapshot.derivados.volt / snapshot.derivados.tempohoras)) > 1e-6) throw new Error("mL/h deve derivar do Volume Total bruto no modo precisão.");
+      if (!getElectrolyteOsmolarityAlertMessages(snapshot).some(function (message) { return message.indexOf("Modo precisão ativado") === 0; })) {
+        throw new Error("Alerta informativo do modo precisão deveria ser exibido.");
+      }
+    });
+
+    tests.push(function testInverseCalculation() {
+      var snapshot = createKnownGoodState();
+      computeInverse(snapshot);
+      assertAlmostEqual(
+        snapshot.clinical.volume,
+        Math.round(snapshot.derivados.volume2 * 10) / 10,
+        "Volume/kg/dia calculado a partir do volume total bruto arredondado no inverso"
+      );
+      assertAlmostEqual(snapshot.clinical.sodio, 3.4, "Sódio preservado no inverso");
+      assertAlmostEqual(snapshot.clinical.potassio, 1.3, "Potássio preservado no inverso");
+      assertAlmostEqual(snapshot.clinical.calcio, 150, "Cálcio preservado no inverso");
+    });
+
+    tests.push(function testVolumeClinicalDoesNotDriftFromSeventy() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.volume = 70;
+      computeDirect(snapshot);
+      computeInverse(snapshot);
+      computeDirect(snapshot);
+      if (formatField("volume", snapshot.clinical.volume, snapshot) !== "70.0") {
+        throw new Error("Volume clínico não deve derivar para 70,1 após ciclos direto/inverso.");
+      }
+    });
+
+    tests.push(function testReverseModes() {
+      var modes = ["volt", "mlhora", "volume1", "volume2", "volume3", "tig"];
+      modes.forEach(function (mode) {
+        var snapshot = createKnownGoodState();
+        if (mode === "volt") reverseFromVolt(snapshot);
+        if (mode === "mlhora") reverseFromMlhora(snapshot);
+        if (mode === "volume1") reverseFromVolume1(snapshot);
+        if (mode === "volume2") reverseFromVolume2(snapshot);
+        if (mode === "volume3") reverseFromVolume3(snapshot);
+        if (mode === "tig") reverseFromTig(snapshot);
+        validateInvariants(snapshot);
+      });
+    });
+
+    tests.push(function testReverseVsModes() {
+      var snapshot1 = createKnownGoodState();
+      recomputeMixFromVs(snapshot1, "vs1");
+      validateInvariants(snapshot1);
+
+      var snapshot2 = createKnownGoodState();
+      recomputeMixFromVs(snapshot2, "vs2");
+      validateInvariants(snapshot2);
+    });
+
+    tests.push(function testZeroPercentSelection() {
+      var pair = chooseGlucosePairForCdPreferCurrent(2.5, 0, 5);
+      if (pair.cs1 !== 0 || pair.cs2 !== 5) {
+        throw new Error("Seleção de soro 0% não preservada.");
+      }
+    });
+
+    tests.push(function testAutoPairSelection() {
+      var pair = chooseGlucosePairForCdPreferCurrent(18, 5, 10);
+      if (pair.cs1 !== 5 || pair.cs2 !== 25) {
+        throw new Error("Par automático inadequado para CD=18.");
+      }
+    });
+
+    tests.push(function testEtapasInvalidas() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.etapas = 5;
+      assertThrows(function () { validateCommon(snapshot); }, "etapas");
+    });
+
+    tests.push(function testVolumeInsuficienteAjustaTaxaHidrica() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.volume = 3;
+      computeDirect(snapshot);
+      validateInvariants(snapshot);
+      assertAlmostEqual(snapshot.prescricao.volumetotal, 0, "Volume SG/SF deve zerar quando eletrólitos ocupam toda a etapa");
+      assertAlmostEqual(
+        snapshot.derivados.volume2,
+        (snapshot.derivados.volt * snapshot.clinical.etapas) / snapshot.clinical.peso,
+        "Taxa hídrica deve acompanhar o volume total exibido"
+      );
+      if (snapshot.clinical.volume <= 3) {
+        throw new Error("Taxa hídrica não foi aumentada apesar do volume insuficiente.");
+      }
+    });
+
+    tests.push(function testAlertaVolumeInadequadoPotassio() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.potassio = 8;
+      computeDirect(snapshot);
+      var messages = getElectrolyteOsmolarityAlertMessages(snapshot);
+      if (!messages.some(function (message) { return message.indexOf("Potássio elevado") === 0; })) {
+        throw new Error("Alerta de potássio deveria ser emitido para concentração final elevada.");
+      }
+      if (messages.join(" | ").indexOf("não corresponde ao volume de KCl") === -1) {
+        throw new Error("Alerta de potássio deve esclarecer volume hídrico total.");
+      }
+    });
+
+    tests.push(function testAlertaSodioTextoVolumeTotal() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.volume = 20;
+      snapshot.clinical.sodio = 10;
+      computeDirect(snapshot);
+      var messages = getElectrolyteOsmolarityAlertMessages(snapshot).join(" | ");
+      if (messages.indexOf("Sódio elevado") === -1 || messages.indexOf("não corresponde ao volume de NaCl") === -1) {
+        throw new Error("Alerta de sódio deveria esclarecer volume hídrico total e volume de NaCl.");
+      }
+    });
+
+    tests.push(function testCalciumContinuousAlert() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.volume = 8;
+      snapshot.clinical.sodio = 0;
+      snapshot.clinical.potassio = 0;
+      snapshot.clinical.calcio = 150;
+      computeDirect(snapshot);
+      var messages = getElectrolyteOsmolarityAlertMessages(snapshot).join(" | ");
+      if (messages.indexOf("Gluconato de cálcio concentrado") === -1) {
+        throw new Error("Alerta de gluconato de cálcio concentrado deveria ser emitido.");
+      }
+      if (messages.indexOf("não corresponde ao volume de gluconato de cálcio") === -1) {
+        throw new Error("Alerta de cálcio deve esclarecer volume hídrico total.");
+      }
+    });
+
+    tests.push(function testCalciumVeryHighAlert() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.volume = 1;
+      snapshot.clinical.sodio = 0;
+      snapshot.clinical.potassio = 0;
+      snapshot.clinical.calcio = 1000;
+      computeDirect(snapshot);
+      var messages = getElectrolyteOsmolarityAlertMessages(snapshot).join(" | ");
+      if (messages.indexOf("Gluconato de cálcio muito concentrado") === -1) {
+        throw new Error("Alerta forte de gluconato de cálcio deveria ser emitido.");
+      }
+    });
+
+    tests.push(function testCdForaDaFaixaFalha() {
+      var snapshot = createKnownGoodState();
+      snapshot.mistura.cd = 60;
+      assertThrows(function () { recomputeMixFromCdWithAutoPair(snapshot); }, "faixa possível");
+    });
+
+    tests.push(function testVolumeBaseZeroZeraMistura() {
+      var snapshot = createKnownGoodState();
+      snapshot.prescricao.volumetotal = 0;
+      syncDerivedFromPrescription(snapshot);
+      recomputeMixFromCd(snapshot);
+      assertAlmostEqual(snapshot.mistura.vs1, 0, "vs1 deve zerar");
+      assertAlmostEqual(snapshot.mistura.vs2, 0, "vs2 deve zerar");
+      assertAlmostEqual(snapshot.mistura.tig, 0, "TIG deve zerar");
+    });
+
+    tests.push(function testAutoAjusteVolumeMisturaOperacional() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.sodio = 0;
+      snapshot.clinical.potassio = 0;
+      snapshot.clinical.calcio = 0;
+      snapshot.clinical.volume = 0.05;
+      snapshot.mistura.cd = 10;
+      snapshot.mistura.cs1 = 5;
+      snapshot.mistura.cs2 = 25;
+      computeDirect(snapshot);
+      validateInvariants(snapshot);
+      assertAlmostEqual(snapshot.mistura.volume3, 0.4, "Volume base glicosado deve subir para tornar o 2º soro ≥ 0,1 mL");
+      assertAlmostEqual(snapshot.mistura.vs1, 0.3, "Volume do 1º soro após ajuste operacional");
+      assertAlmostEqual(snapshot.mistura.vs2, 0.1, "Volume do 2º soro após ajuste operacional");
+      if (!snapshot._meta || !snapshot._meta.mixVolumeAutoAdjustment) {
+        throw new Error("Ajuste automático da mistura deveria ser registrado em _meta.");
+      }
+      var messages = getMixAutoAdjustmentAlertMessages(snapshot).join(" | ");
+      if (messages.indexOf("Volume base glicosado aumentado automaticamente") === -1) {
+        throw new Error("Alerta de aumento automático da mistura deveria ser exibido no alerta vermelho específico.");
+      }
+      if (getGlucoseTigAlertMessages(snapshot).join(" | ").indexOf("Volume base glicosado aumentado automaticamente") !== -1) {
+        throw new Error("Alerta de ajuste automático não deve ficar misturado aos alertas clínicos amarelos da mistura.");
+      }
+    });
+
+    tests.push(function testLowOsmolarityAlert() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.sodio = 0;
+      snapshot.clinical.potassio = 0;
+      snapshot.clinical.calcio = 0;
+      snapshot.mistura.cd = 0;
+      snapshot.mistura.cs1 = 0;
+      snapshot.mistura.cs2 = 5;
+      computeDirect(snapshot);
+      var messages = getElectrolyteOsmolarityAlertMessages(snapshot).join(" | ");
+      if (messages.indexOf("Osmolaridade reduzida") === -1) {
+        throw new Error("Alerta de osmolaridade reduzida deveria ser emitido.");
+      }
+      if (messages.indexOf("hemólise") === -1) {
+        throw new Error("Alerta de osmolaridade reduzida deve citar risco de hemólise.");
+      }
+    });
+
+    tests.push(function testUniversalHighOsmolarityAlert() {
+      var snapshot = createKnownGoodState();
+      snapshot.mistura.cd = 18;
+      recomputeMixFromCdWithAutoPair(snapshot);
+      var messages = getElectrolyteOsmolarityAlertMessages(snapshot).join(" | ");
+      if (messages.indexOf("Osmolaridade aumentada") === -1) {
+        throw new Error("Alerta universal de osmolaridade aumentada não foi gerado.");
+      }
+      if (messages.indexOf("mL/kg/dia de volume hídrico total") === -1) {
+        throw new Error("Alerta de osmolaridade deve informar volume hídrico mínimo estimado.");
+      }
+      if (messages.indexOf("estimativa físico-química") === -1) {
+        throw new Error("Alerta de osmolaridade deve explicitar que é estimativa físico-química.");
+      }
+    });
+
+    tests.push(function testUniversalConcentratedGlucoseAlert() {
+      var snapshot = createKnownGoodState();
+      snapshot.mistura.cd = 15;
+      recomputeMixFromCdWithAutoPair(snapshot);
+      var messages = getGlucoseTigAlertMessages(snapshot).join(" | ");
+      if (messages.indexOf("Glicose concentrada") === -1) {
+        throw new Error("Alerta universal de glicose concentrada não foi gerado.");
+      }
+    });
+
+    tests.push(function testUniversalHighTigAlert() {
+      var snapshot = createKnownGoodState();
+      snapshot.mistura.cd = 25;
+      recomputeMixFromCdWithAutoPair(snapshot);
+      var messages = getGlucoseTigAlertMessages(snapshot).join(" | ");
+      if (messages.indexOf("TIG elevada") === -1 && messages.indexOf("TIG muito elevada") === -1) {
+        throw new Error("Alerta universal de TIG elevada não foi gerado.");
+      }
+    });
+
+    tests.push(function testGlucoseAlertsAreSeparatedFromSolutionAlerts() {
+      var snapshot = createKnownGoodState();
+      snapshot.mistura.cd = 15;
+      recomputeMixFromCdWithAutoPair(snapshot);
+      var solutionMessages = getElectrolyteOsmolarityAlertMessages(snapshot).join(" | ");
+      var glucoseMessages = getGlucoseTigAlertMessages(snapshot).join(" | ");
+      if (solutionMessages.indexOf("Glicose") !== -1 || solutionMessages.indexOf("TIG") !== -1) {
+        throw new Error("Alertas de glicose/TIG não devem aparecer no bloco de eletrólitos/osmolaridade.");
+      }
+      if (glucoseMessages.indexOf("Glicose concentrada") === -1) {
+        throw new Error("Alerta de glicose concentrada deveria aparecer no bloco de mistura.");
+      }
+    });
+
+    var passed = 0;
+    tests.forEach(function (testFn) {
+      testFn();
+      passed += 1;
+    });
+
+    return { passed: passed, total: tests.length };
+  }
+
+  function bootstrap() {
+    initializeCollapsibleSections();
+
+    initialRawState = createStateFromForm();
+    state = deepClone(initialRawState);
+
+    try {
+      computeDirect(state);
+      commit(state);
+    } catch (error) {
+      showErrorToast(error.message || String(error));
+    }
+
+    try {
+      window.HidraCalculator.selfTest = runSelfTests();
+    } catch (error) {
+      window.HidraCalculator.selfTest = {
+        passed: 0,
+        total: 0,
+        error: error && error.message ? error.message : String(error)
+      };
+      if (window.console && typeof window.console.error === "function") {
+        window.console.error("Falha nos autotestes internos:", error);
+      }
+    }
+
+    bindFieldEvents();
+  }
+
+  window.HidraCalculator = {
+    createStateFromForm: createStateFromForm,
+    computeDirect: computeDirect,
+    computeInverse: computeInverse,
+    recomputeMixFromCd: recomputeMixFromCd,
+    recomputeMixFromCdWithAutoPair: recomputeMixFromCdWithAutoPair,
+    applyMinimumOperationalMixVolume: applyMinimumOperationalMixVolume,
+    recomputeMixFromVs: recomputeMixFromVs,
+    reverseFromVolt: reverseFromVolt,
+    reverseFromMlhora: reverseFromMlhora,
+    reverseFromVolume1: reverseFromVolume1,
+    reverseFromVolume2: reverseFromVolume2,
+    reverseFromVolume3: reverseFromVolume3,
+    reverseFromTig: reverseFromTig,
+    validateInvariants: validateInvariants,
+    getSolutionAlertMessages: getSolutionAlertMessages,
+    getElectrolyteOsmolarityAlertMessages: getElectrolyteOsmolarityAlertMessages,
+    getGlucoseTigAlertMessages: getGlucoseTigAlertMessages,
+    chooseGlucosePairForCdPreferCurrent: chooseGlucosePairForCdPreferCurrent,
+    getIntentForField: getIntentForField,
+    computeByIntent: computeByIntent,
+    updateFromUserField: updateFromUserField,
+    recalculateFromCurrentState: recalculateFromCurrentState,
+    runSelfTests: runSelfTests
+  };
+
+
+  document.addEventListener("DOMContentLoaded", bootstrap);
+})();
+</script>
+
+
+</body>
+</html>
