@@ -411,7 +411,7 @@
       <div class="grid-2">
         <div class="campo">
           <label>Peso de Cálculo</label>
-          <input type="number" step="0.1" min="0" max="10" name="peso" value="3.000">
+          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="5" name="peso" value="3,000">
           <span class="unidade">kg</span>
         </div>
         <div class="campo">
@@ -447,6 +447,9 @@
         </div>
       </div>
       <div class="btn-row">
+        <button type="button" class="btn btn-primary" id="btnCalcular">
+          Calcular
+        </button>
         <button type="reset" class="btn btn-reset" data-clear-top="true">
           Limpar Dados
         </button>
@@ -523,7 +526,7 @@
         </div>
         <div class="campo">
           <label>Peso de Cálculo</label>
-          <input type="number" step="0.1" min="0" max="10" name="peso1" value="0">
+          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="5" name="peso1" value="0">
           <span class="unidade">kg</span>
         </div>
       </div>
@@ -603,8 +606,11 @@
     </div>
   </details>
 
-  <!-- ====== BOTÃO LIMPAR ====== -->
-  <div style="text-align:center;">
+  <!-- ====== BOTÕES INFERIORES ====== -->
+  <div class="btn-row" style="justify-content:center;">
+    <button type="button" class="btn btn-primary" id="btnCalcularRodape">
+      Calcular
+    </button>
     <button type="reset" class="btn btn-reset">Limpar Dados</button>
   </div>
 
@@ -724,10 +730,32 @@
     return Number(normalized);
   }
 
+
+  function maskWeightInputValue(rawValue) {
+    var rawDigits = String(rawValue || "").replace(/\D/g, "");
+    var digits = rawDigits.slice(0, 4);
+
+    if (digits === "") return "";
+    if (rawDigits.length > 4 || Number(rawDigits) > 9999) return "9,999";
+
+    // Padrão durante a digitação:
+    // 3 -> 3 | 30 -> 3,0 | 300 -> 3,00 | 3000 -> 3,000 | valores acima de 9,999 -> 9,999
+    if (digits.length === 1) return digits;
+    if (digits.length <= 4) return digits.charAt(0) + "," + digits.slice(1);
+    return digits.slice(0, 2) + "," + digits.slice(2);
+  }
+
   function formatField(name, value, snapshot) {
     if (!Number.isFinite(value)) return "";
     var decimals = getFieldDecimals(name, snapshot);
-    return round(value, decimals).toFixed(decimals);
+    var formatted = round(value, decimals).toFixed(decimals);
+
+    // O campo de peso deve usar vírgula decimal no padrão neonatal brasileiro.
+    if (name === "peso" || name === "peso1") {
+      return formatted.replace(".", ",");
+    }
+
+    return formatted;
   }
 
   function deepClone(obj) {
@@ -779,6 +807,14 @@
 
     var referenceSnapshot = snapshot || state;
 
+    // Peso neonatal: abaixo de 5 kg, exibir 3 casas decimais; a partir de 5 kg, 1 casa decimal.
+    if (name === "peso" || name === "peso1") {
+      var pesoReferencia = referenceSnapshot && referenceSnapshot.clinical
+        ? Number(referenceSnapshot.clinical.peso)
+        : NaN;
+      return Number.isFinite(pesoReferencia) && pesoReferencia < 5 ? 3 : 1;
+    }
+
     // O volume base glicosado por etapa fecha a soma exibida e deve manter 1 casa decimal em todos os pesos.
     if (name === "volumetotal" || name === "volume3") return 1;
 
@@ -808,7 +844,7 @@
     var sanitized = value;
 
     if (sanitized < 0) sanitized = 0;
-    if (name === "peso" || name === "peso1") sanitized = Math.min(sanitized, 10);
+    if (name === "peso" || name === "peso1") sanitized = Math.min(sanitized, 9.999);
     if (name === "etapas" || name === "etapas2") sanitized = Math.min(Math.round(sanitized), 24);
     if (name === "volume" || name === "volume2") sanitized = Math.min(sanitized, 200);
     if (name === "sodio" || name === "potassio") sanitized = Math.min(sanitized, 10);
@@ -881,7 +917,7 @@
     switch (name) {
       case "peso":
       case "peso1":
-        return 10;
+        return 9.999;
       case "etapas":
       case "etapas2":
         return 24;
@@ -1064,7 +1100,8 @@
   }
 
   function validateCommon(snapshot) {
-    if (snapshot.clinical.peso < 0.001) throw new Error("Peso muito baixo.");
+    if (snapshot.clinical.peso < 0.3) throw new Error("Peso < 0,3 kg não suportado por esta ferramenta.");
+    if (snapshot.clinical.peso > 9.999) throw new Error("Peso > 9,999 kg não suportado por esta ferramenta.");
 
     if (!Number.isInteger(snapshot.clinical.etapas) || snapshot.clinical.etapas < 1 || snapshot.clinical.etapas > 24) {
       throw new Error("Etapas devem ser um número inteiro entre 1 e 24.");
@@ -1347,7 +1384,7 @@
     var peso = snapshot.clinical.peso;
     var etapas = snapshot.clinical.etapas;
 
-    if (peso < 0.001) throw new Error("Peso muito baixo.");
+    if (peso < 0.3) throw new Error("Peso < 0,3 kg não suportado por esta ferramenta.");
     if ([volumetotal, sodiototal, potassiototal, calciototal].some(function (v) { return v < -EPS; })) {
       throw new Error("Volumes não podem ser negativos.");
     }
@@ -1986,6 +2023,18 @@
     }
   }
 
+  function handleCalculateButtonClick() {
+    if (updating) return;
+
+    try {
+      var candidate = createStateFromForm();
+      computeDirect(candidate);
+      commit(candidate);
+    } catch (error) {
+      fail(error, true);
+    }
+  }
+
   function bindFieldEvents() {
     Object.keys(FIELD_META).forEach(function (name) {
       var el = form[name];
@@ -2012,9 +2061,30 @@
         // Selects confirmam a intenção no próprio change.
         el.addEventListener("change", function () { triggerFieldUpdate({ soft: false }); });
       } else {
+        // Máscara ativa apenas para Peso de Cálculo.
+        // O cálculo continua sendo confirmado apenas ao sair do campo.
+        if (name === "peso" || name === "peso1") {
+          el.addEventListener("input", function () {
+            var masked = maskWeightInputValue(el.value);
+            if (el.value !== masked) {
+              el.value = masked;
+              try {
+                el.setSelectionRange(el.value.length, el.value.length);
+              } catch (ignore) {}
+            }
+          });
+        }
+
         // Campos digitáveis não recalculam durante a digitação.
         // O cálculo é confirmado apenas ao sair do campo.
         el.addEventListener("blur", function () { triggerFieldUpdate({ soft: false }); });
+      }
+    });
+
+    ["btnCalcular", "btnCalcularRodape"].forEach(function (buttonId) {
+      var calculateButton = document.getElementById(buttonId);
+      if (calculateButton) {
+        calculateButton.addEventListener("click", handleCalculateButtonClick);
       }
     });
 
@@ -2131,7 +2201,13 @@
 
     tests.push(function testOneDecimalVisibleFormatting() {
       var snapshot = createKnownGoodState();
-      if (formatField("peso", snapshot.clinical.peso, snapshot) !== "3.0") throw new Error("Peso deve exibir 1 casa decimal.");
+      if (formatField("peso", snapshot.clinical.peso, snapshot) !== "3,000") throw new Error("Peso < 5 kg deve exibir 3 casas decimais.");
+      snapshot.clinical.peso = 5;
+      if (formatField("peso", snapshot.clinical.peso, snapshot) !== "5,0") throw new Error("Peso >= 5 kg deve exibir 1 casa decimal.");
+      snapshot.clinical.peso = 10;
+      sanitizeFieldInState("peso", snapshot);
+      if (Math.abs(snapshot.clinical.peso - 9.999) > 1e-9) throw new Error("Peso máximo deve ser 9,999 kg.");
+      snapshot.clinical.peso = 3;
       if (formatField("volumetotal", snapshot.prescricao.volumetotal, snapshot).split(".")[1].length !== 1) throw new Error("Volume base glicosado por etapa deve exibir 1 casa decimal em peso >= 1,5 kg.");
       if (formatField("volume3", snapshot.mistura.volume3, snapshot).split(".")[1].length !== 1) throw new Error("Volume base da mistura deve exibir 1 casa decimal em peso >= 1,5 kg.");
       if (Math.abs(snapshot.mistura.volume3 - snapshot.prescricao.volumetotal) > 1e-6) throw new Error("Volume base da mistura deve ser igual ao volume bruto da prescrição.");
@@ -2236,6 +2312,12 @@
       var snapshot = createKnownGoodState();
       snapshot.clinical.etapas = 5;
       assertThrows(function () { validateCommon(snapshot); }, "etapas");
+    });
+
+    tests.push(function testPesoMenorQueZeroVirgulaTresFalha() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.peso = 0.299;
+      assertThrows(function () { validateCommon(snapshot); }, "Peso < 0,3 kg");
     });
 
     tests.push(function testVolumeInsuficienteAjustaTaxaHidrica() {
