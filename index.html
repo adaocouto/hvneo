@@ -411,12 +411,12 @@
       <div class="grid-2">
         <div class="campo">
           <label>Peso de Cálculo</label>
-          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="5" name="peso" value="3,000">
+          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso" value="3,000">
           <span class="unidade">kg</span>
         </div>
         <div class="campo">
           <label>Número de Etapas</label>
-          <input type="number" step="1" min="0" max="24" name="etapas" value="1">
+          <input type="number" step="1" min="0" max="12" name="etapas" value="1">
           <span class="unidade">etapas/dia</span>
         </div>
         <div class="campo">
@@ -431,18 +431,18 @@
               <option value="1">10%</option>
               <option value="2" selected>20%</option>
             </select>
-            <input type="number" step="0.1" min="0" name="sodio" value="3.4" max="10">
+            <input type="number" step="0.1" min="0" name="sodio" value="3" max="10">
           </div>
           <span class="unidade">mEq/kg/dia</span>
         </div>
         <div class="campo">
           <label>Potássio (KCl 10%)</label>
-          <input type="number" step="0.1" min="0" name="potassio" value="1.3" max="10">
+          <input type="number" step="0.1" min="0" name="potassio" value="2" max="10">
           <span class="unidade">mEq/kg/dia</span>
         </div>
         <div class="campo">
           <label>Cálcio (Gluconato de Cálcio 10%)</label>
-          <input type="number" step="0.1" min="0" name="calcio" value="150" max="1000">
+          <input type="number" step="0.1" min="0" name="calcio" value="200" max="1000">
           <span class="unidade">mg/kg/dia de gluconato de cálcio 10%</span>
         </div>
       </div>
@@ -526,7 +526,7 @@
         </div>
         <div class="campo">
           <label>Peso de Cálculo</label>
-          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="5" name="peso1" value="0">
+          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso1" value="0">
           <span class="unidade">kg</span>
         </div>
       </div>
@@ -534,7 +534,7 @@
       <div class="prescricao-resultados-compactos">
         <div class="campo">
           <label>Número de Etapas</label>
-          <input type="number" step="1" min="0" max="24" name="etapas2" value="1">
+          <input type="number" step="1" min="0" max="12" name="etapas2" value="1">
           <span class="unidade">etapas/dia</span>
         </div>
         <div class="campo">
@@ -584,8 +584,8 @@
           <select name="cs2">
             <option value="0">0% (Água destilada)</option>
             <option value="5">5%</option>
-            <option value="10">10%</option>
-            <option value="25" selected>25%</option>
+            <option value="10" selected>10%</option>
+            <option value="25">25%</option>
             <option value="50">50%</option>
           </select>
           <span class="unidade">% glicose</span>
@@ -649,6 +649,9 @@
   // constants
   // ==========================================================
   var EPS = 1e-9;
+  var MAX_WEIGHT_KG = 20;
+  var MAX_GLYCOSATED_BASE_VOLUME_PER_STAGE_ML = 500;
+  var ALLOWED_STAGE_COUNTS = [1, 2, 3, 4, 6, 8, 12];
   var TOAST_DURATION_MS = 5000;
   var ALLOWED_GLUCOSE = [0, 5, 10, 25, 50];
   var DEXTROSE_MONOHYDRATE_MW = 198.17; // g/mol; dextrose monohidratada usada em soluções IV
@@ -731,15 +734,48 @@
   }
 
 
+  function getMaskedWeightNumericValue(rawValue) {
+    var rawDigits = String(rawValue || "").replace(/\D/g, "");
+    if (rawDigits === "") return NaN;
+
+    var digits = rawDigits.slice(0, 5);
+    var formatted;
+
+    if (digits.length === 1) {
+      formatted = digits;
+    } else if (digits.length <= 4) {
+      formatted = digits.charAt(0) + "," + digits.slice(1);
+    } else {
+      formatted = digits.slice(0, 2) + "," + digits.slice(2);
+    }
+
+    return parseDecimal(formatted);
+  }
+
+  function formatWeightMaxForInput() {
+    // A máscara do campo de peso usa precisão de 3 casas para permitir digitar 20,000 kg.
+    return MAX_WEIGHT_KG.toFixed(3).replace(".", ",");
+  }
+
+  function isWeightInputAboveMax(rawValue) {
+    var rawDigits = String(rawValue || "").replace(/\D/g, "");
+    if (rawDigits === "") return false;
+    if (rawDigits.length > 5) return true;
+
+    var numericValue = getMaskedWeightNumericValue(rawValue);
+    return Number.isFinite(numericValue) && numericValue > MAX_WEIGHT_KG + EPS;
+  }
+
   function maskWeightInputValue(rawValue) {
     var rawDigits = String(rawValue || "").replace(/\D/g, "");
-    var digits = rawDigits.slice(0, 4);
+    var digits = rawDigits.slice(0, 5);
 
     if (digits === "") return "";
-    if (rawDigits.length > 4 || Number(rawDigits) > 9999) return "9,999";
+    if (isWeightInputAboveMax(rawValue)) return formatWeightMaxForInput();
 
     // Padrão durante a digitação:
-    // 3 -> 3 | 30 -> 3,0 | 300 -> 3,00 | 3000 -> 3,000 | valores acima de 9,999 -> 9,999
+    // 3 -> 3 | 30 -> 3,0 | 300 -> 3,00 | 3000 -> 3,000 | 20000 -> 20,000
+    // Valores acima de 20 kg são ajustados para 20,000 kg com alerta.
     if (digits.length === 1) return digits;
     if (digits.length <= 4) return digits.charAt(0) + "," + digits.slice(1);
     return digits.slice(0, 2) + "," + digits.slice(2);
@@ -844,8 +880,8 @@
     var sanitized = value;
 
     if (sanitized < 0) sanitized = 0;
-    if (name === "peso" || name === "peso1") sanitized = Math.min(sanitized, 9.999);
-    if (name === "etapas" || name === "etapas2") sanitized = Math.min(Math.round(sanitized), 24);
+    if (name === "peso" || name === "peso1") sanitized = Math.min(sanitized, MAX_WEIGHT_KG);
+    if (name === "etapas" || name === "etapas2") sanitized = Math.min(Math.round(sanitized), 12);
     if (name === "volume" || name === "volume2") sanitized = Math.min(sanitized, 200);
     if (name === "sodio" || name === "potassio") sanitized = Math.min(sanitized, 10);
     if (name === "calcio") sanitized = Math.min(sanitized, 1000);
@@ -917,10 +953,10 @@
     switch (name) {
       case "peso":
       case "peso1":
-        return 9.999;
+        return MAX_WEIGHT_KG;
       case "etapas":
       case "etapas2":
-        return 24;
+        return 12;
       case "volume":
       case "volume2":
         return 200;
@@ -979,6 +1015,15 @@
   function sanitizeFieldInState(name, snapshot) {
     var currentValue = getByPath(snapshot, FIELD_META[name].path);
     var sanitized = sanitizeValueForField(name, currentValue, snapshot);
+
+    if ((name === "peso" || name === "peso1") && Number.isFinite(currentValue) && Number.isFinite(sanitized) && Math.abs(currentValue - sanitized) > EPS) {
+      if (!snapshot._meta) snapshot._meta = {};
+      snapshot._meta.weightAutoAdjustment = {
+        from: currentValue,
+        to: sanitized
+      };
+    }
+
     setByPath(snapshot, FIELD_META[name].path, sanitized);
 
     if (name === "volume3") {
@@ -1099,16 +1144,65 @@
     };
   }
 
-  function validateCommon(snapshot) {
-    if (snapshot.clinical.peso < 0.3) throw new Error("Peso < 0,3 kg não suportado por esta ferramenta.");
-    if (snapshot.clinical.peso > 9.999) throw new Error("Peso > 9,999 kg não suportado por esta ferramenta.");
+  function isAllowedStageCount(value) {
+    return ALLOWED_STAGE_COUNTS.indexOf(Number(value)) >= 0;
+  }
 
-    if (!Number.isInteger(snapshot.clinical.etapas) || snapshot.clinical.etapas < 1 || snapshot.clinical.etapas > 24) {
-      throw new Error("Etapas devem ser um número inteiro entre 1 e 24.");
+  function chooseAllowedStageCountForBaseVolume(currentStages, baseVolumePerStage) {
+    var current = Number(currentStages);
+    var base = safeNonNegative(baseVolumePerStage);
+
+    if (!Number.isFinite(current) || !Number.isInteger(current)) return currentStages;
+    if (base <= MAX_GLYCOSATED_BASE_VOLUME_PER_STAGE_ML + EPS) return current;
+
+    var dailyBaseVolume = base * current;
+    var minimumStagesNeeded = Math.ceil(dailyBaseVolume / MAX_GLYCOSATED_BASE_VOLUME_PER_STAGE_ML - EPS);
+    var lowerBound = Math.max(current, minimumStagesNeeded);
+
+    for (var i = 0; i < ALLOWED_STAGE_COUNTS.length; i += 1) {
+      if (ALLOWED_STAGE_COUNTS[i] >= lowerBound) return ALLOWED_STAGE_COUNTS[i];
     }
 
-    if (24 % snapshot.clinical.etapas !== 0) {
-      throw new Error("O número de etapas deve gerar tempo em horas inteiro. Exemplos válidos: 1, 2, 3, 4, 6, 8, 12 e 24.");
+    return ALLOWED_STAGE_COUNTS[ALLOWED_STAGE_COUNTS.length - 1];
+  }
+
+  function enforceMaxGlycosatedBaseVolumePerStage(snapshot) {
+    var currentStages = snapshot.clinical.etapas;
+    var baseVolumePerStage = safeNonNegative(snapshot.prescricao.volumetotal);
+
+    if (baseVolumePerStage <= MAX_GLYCOSATED_BASE_VOLUME_PER_STAGE_ML + EPS) return false;
+
+    var newStages = chooseAllowedStageCountForBaseVolume(currentStages, baseVolumePerStage);
+    if (!Number.isInteger(newStages) || newStages <= currentStages) return false;
+
+    var factor = currentStages / newStages;
+    var previousBaseVolume = baseVolumePerStage;
+
+    snapshot.clinical.etapas = newStages;
+    snapshot.prescricao.volumetotal *= factor;
+    snapshot.prescricao.sodiototal *= factor;
+    snapshot.prescricao.potassiototal *= factor;
+    snapshot.prescricao.calciototal *= factor;
+
+    syncDerivedFromPrescription(snapshot);
+    snapshot.clinical.volume = Math.round(snapshot.derivados.volume2 * 10) / 10;
+
+    ensureMeta(snapshot).stageAutoAdjustment = {
+      from: currentStages,
+      to: newStages,
+      previousBaseVolume: previousBaseVolume,
+      newBaseVolume: snapshot.prescricao.volumetotal
+    };
+
+    return true;
+  }
+
+  function validateCommon(snapshot) {
+    if (snapshot.clinical.peso < 0.3) throw new Error("Peso < 0,3 kg não suportado por esta ferramenta.");
+    if (snapshot.clinical.peso > MAX_WEIGHT_KG) throw new Error("Peso > 20 kg não suportado por esta ferramenta.");
+
+    if (!Number.isInteger(snapshot.clinical.etapas) || !isAllowedStageCount(snapshot.clinical.etapas)) {
+      throw new Error("Etapas devem ser uma das opções permitidas: 1, 2, 3, 4, 6, 8 ou 12.");
     }
 
     snapshot.derivados.tempohoras = 24 / snapshot.clinical.etapas;
@@ -1370,6 +1464,7 @@
     snapshot.prescricao.calciototal = calciototal;
 
     syncDerivedFromPrescription(snapshot);
+    enforceMaxGlycosatedBaseVolumePerStage(snapshot);
     recomputeMixFromCd(snapshot);
   }
 
@@ -1385,6 +1480,7 @@
     var etapas = snapshot.clinical.etapas;
 
     if (peso < 0.3) throw new Error("Peso < 0,3 kg não suportado por esta ferramenta.");
+    if (peso > MAX_WEIGHT_KG) throw new Error("Peso > 20 kg não suportado por esta ferramenta.");
     if ([volumetotal, sodiototal, potassiototal, calciototal].some(function (v) { return v < -EPS; })) {
       throw new Error("Volumes não podem ser negativos.");
     }
@@ -1396,6 +1492,7 @@
 
     syncDerivedFromPrescription(snapshot);
     snapshot.clinical.volume = Math.round(snapshot.derivados.volume2 * 10) / 10;
+    enforceMaxGlycosatedBaseVolumePerStage(snapshot);
     recomputeMixFromCd(snapshot);
   }
 
@@ -1850,8 +1947,16 @@
 
   function commit(candidate, renderOptions) {
     validateInvariants(candidate);
+    var weightAutoAdjustment = candidate._meta && candidate._meta.weightAutoAdjustment;
+    var stageAutoAdjustment = candidate._meta && candidate._meta.stageAutoAdjustment;
     state = candidate;
     render(state, renderOptions);
+    showWeightAutoAdjustmentToast(weightAutoAdjustment);
+    showStageAutoAdjustmentToast(stageAutoAdjustment);
+    if (state && state._meta) {
+      state._meta.weightAutoAdjustment = null;
+      state._meta.stageAutoAdjustment = null;
+    }
   }
 
   function atomic(mutator, renderOptions) {
@@ -1871,6 +1976,32 @@
     errorToast.classList.add("show");
     clearTimeout(errorToastHideTimer);
     errorToastHideTimer = setTimeout(hideErrorToast, TOAST_DURATION_MS);
+  }
+
+  function showWeightAutoAdjustmentToast(adjustment) {
+    if (!adjustment) return;
+    showErrorToast(
+      "Peso ajustado automaticamente de " +
+      formatField("peso", adjustment.from, { clinical: { peso: adjustment.from } }) +
+      " kg para " +
+      formatField("peso", adjustment.to, { clinical: { peso: adjustment.to } }) +
+      " kg, pois o peso máximo permitido nesta ferramenta é 20 kg."
+    );
+  }
+
+  function showStageAutoAdjustmentToast(adjustment) {
+    if (!adjustment) return;
+    showErrorToast(
+      "Número de etapas ajustado automaticamente de " +
+      adjustment.from +
+      " para " +
+      adjustment.to +
+      ", para manter o Volume base glicosado por Etapa em até " +
+      formatAlertNumber(MAX_GLYCOSATED_BASE_VOLUME_PER_STAGE_ML, 0) +
+      " mL. Novo volume base: " +
+      formatAlertNumber(adjustment.newBaseVolume, 1) +
+      " mL por etapa."
+    );
   }
 
   function fail(error, preserveForm) {
@@ -2007,15 +2138,24 @@
     if (mistura) mistura.open = true;
   }
 
-  function scrollPrescriptionToTop() {
-    var section = document.getElementById("secaoPrescricao");
+  function scrollSectionToTop(sectionId) {
+    var section = document.getElementById(sectionId);
     if (!section) return;
-    setSectionOpen("secaoPrescricao", true);
+
+    if (sectionId === "secaoPrescricao") {
+      setSectionOpen("secaoPrescricao", true);
+    }
+
+    if (sectionId === "secaoMistura" && "open" in section) {
+      section.open = true;
+    }
+
     var scrollAction = function () {
       if (typeof section.scrollIntoView === "function") {
         section.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
       }
     };
+
     if (typeof window.requestAnimationFrame === "function") {
       window.requestAnimationFrame(scrollAction);
     } else {
@@ -2023,13 +2163,32 @@
     }
   }
 
-  function handleCalculateButtonClick() {
+  function scrollPrescriptionToTop() {
+    scrollSectionToTop("secaoPrescricao");
+  }
+
+  function scrollMixtureToTop() {
+    scrollSectionToTop("secaoMistura");
+  }
+
+  function handleCalculateButtonClick(targetSectionId) {
     if (updating) return;
 
     try {
+      var rawPeso = parseDecimal(form.peso && form.peso.value);
       var candidate = createStateFromForm();
+      if (Number.isFinite(rawPeso) && rawPeso > MAX_WEIGHT_KG && candidate && candidate.clinical && Math.abs(candidate.clinical.peso - rawPeso) > EPS) {
+        if (!candidate._meta) candidate._meta = {};
+        candidate._meta.weightAutoAdjustment = {
+          from: rawPeso,
+          to: candidate.clinical.peso
+        };
+      }
       computeDirect(candidate);
       commit(candidate);
+      if (targetSectionId) {
+        scrollSectionToTop(targetSectionId);
+      }
     } catch (error) {
       fail(error, true);
     }
@@ -2065,12 +2224,17 @@
         // O cálculo continua sendo confirmado apenas ao sair do campo.
         if (name === "peso" || name === "peso1") {
           el.addEventListener("input", function () {
-            var masked = maskWeightInputValue(el.value);
+            var rawValue = el.value;
+            var wasAboveMax = isWeightInputAboveMax(rawValue);
+            var masked = maskWeightInputValue(rawValue);
             if (el.value !== masked) {
               el.value = masked;
               try {
                 el.setSelectionRange(el.value.length, el.value.length);
               } catch (ignore) {}
+              if (wasAboveMax) {
+                showErrorToast("Peso ajustado automaticamente para 20 kg, pois o peso máximo permitido nesta ferramenta é 20 kg.");
+              }
             }
           });
         }
@@ -2081,12 +2245,19 @@
       }
     });
 
-    ["btnCalcular", "btnCalcularRodape"].forEach(function (buttonId) {
-      var calculateButton = document.getElementById(buttonId);
-      if (calculateButton) {
-        calculateButton.addEventListener("click", handleCalculateButtonClick);
-      }
-    });
+    var topCalculateButton = document.getElementById("btnCalcular");
+    if (topCalculateButton) {
+      topCalculateButton.addEventListener("click", function () {
+        handleCalculateButtonClick("secaoPrescricao");
+      });
+    }
+
+    var footerCalculateButton = document.getElementById("btnCalcularRodape");
+    if (footerCalculateButton) {
+      footerCalculateButton.addEventListener("click", function () {
+        handleCalculateButtonClick("secaoMistura");
+      });
+    }
 
     form.addEventListener("reset", function (event) {
       event.preventDefault();
@@ -2094,8 +2265,20 @@
         var candidate = deepClone(initialRawState || createStateFromForm());
         computeDirect(candidate);
         commit(candidate);
+        window.requestAnimationFrame(function () {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
       } catch (error) {
         fail(error, false);
+        window.requestAnimationFrame(function () {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
       }
     });
   }
@@ -2204,9 +2387,14 @@
       if (formatField("peso", snapshot.clinical.peso, snapshot) !== "3,000") throw new Error("Peso < 5 kg deve exibir 3 casas decimais.");
       snapshot.clinical.peso = 5;
       if (formatField("peso", snapshot.clinical.peso, snapshot) !== "5,0") throw new Error("Peso >= 5 kg deve exibir 1 casa decimal.");
-      snapshot.clinical.peso = 10;
+      snapshot.clinical.peso = 25;
       sanitizeFieldInState("peso", snapshot);
-      if (Math.abs(snapshot.clinical.peso - 9.999) > 1e-9) throw new Error("Peso máximo deve ser 9,999 kg.");
+      if (Math.abs(snapshot.clinical.peso - 20) > 1e-9) throw new Error("Peso máximo deve ser 20 kg.");
+      assertThrows(function () {
+        var invalid = createKnownGoodState();
+        invalid.clinical.peso = 20.001;
+        computeDirect(invalid);
+      }, "Peso > 20 kg");
       snapshot.clinical.peso = 3;
       if (formatField("volumetotal", snapshot.prescricao.volumetotal, snapshot).split(".")[1].length !== 1) throw new Error("Volume base glicosado por etapa deve exibir 1 casa decimal em peso >= 1,5 kg.");
       if (formatField("volume3", snapshot.mistura.volume3, snapshot).split(".")[1].length !== 1) throw new Error("Volume base da mistura deve exibir 1 casa decimal em peso >= 1,5 kg.");
@@ -2311,7 +2499,25 @@
     tests.push(function testEtapasInvalidas() {
       var snapshot = createKnownGoodState();
       snapshot.clinical.etapas = 5;
-      assertThrows(function () { validateCommon(snapshot); }, "etapas");
+      assertThrows(function () { validateCommon(snapshot); }, "Etapas");
+    });
+
+    tests.push(function testAjusteAutomaticoDeEtapasPorVolumeBase() {
+      var snapshot = createKnownGoodState();
+      snapshot.clinical.peso = 20;
+      snapshot.clinical.etapas = 1;
+      snapshot.clinical.volume = 200;
+      snapshot.clinical.sodio = 3;
+      snapshot.clinical.potassio = 2;
+      snapshot.clinical.calcio = 200;
+      computeDirect(snapshot);
+      validateInvariants(snapshot);
+      if (snapshot.prescricao.volumetotal > MAX_GLYCOSATED_BASE_VOLUME_PER_STAGE_ML + EPS) {
+        throw new Error("Volume base glicosado por etapa ultrapassou 500 mL após ajuste automático.");
+      }
+      if (snapshot.clinical.etapas !== 8) {
+        throw new Error("Peso 20 kg, 200 mL/kg/dia deveria ajustar automaticamente para 8 etapas.");
+      }
     });
 
     tests.push(function testPesoMenorQueZeroVirgulaTresFalha() {
@@ -2544,6 +2750,7 @@
     recomputeMixFromCd: recomputeMixFromCd,
     recomputeMixFromCdWithAutoPair: recomputeMixFromCdWithAutoPair,
     applyMinimumOperationalMixVolume: applyMinimumOperationalMixVolume,
+    enforceMaxGlycosatedBaseVolumePerStage: enforceMaxGlycosatedBaseVolumePerStage,
     recomputeMixFromVs: recomputeMixFromVs,
     reverseFromVolt: reverseFromVolt,
     reverseFromMlhora: reverseFromMlhora,
