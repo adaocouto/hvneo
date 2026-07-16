@@ -411,7 +411,7 @@
       <div class="grid-2">
         <div class="campo">
           <label>Peso de Cálculo</label>
-          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso" value="3,000">
+          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso" value="">
           <span class="unidade">kg</span>
         </div>
         <div class="campo">
@@ -429,7 +429,7 @@
         </div>
         <div class="campo">
           <label>Volume</label>
-          <input type="text" inputmode="decimal" name="volume" value="70.00">
+          <input type="text" inputmode="decimal" name="volume" value="">
           <span class="unidade">ml/kg/dia</span>
         </div>
         <div class="campo">
@@ -439,18 +439,18 @@
               <option value="1">10%</option>
               <option value="2" selected>20%</option>
             </select>
-            <input type="text" inputmode="decimal" name="sodio" value="3.00">
+            <input type="text" inputmode="decimal" name="sodio" value="">
           </div>
           <span class="unidade">mEq/kg/dia</span>
         </div>
         <div class="campo">
           <label>Potássio (KCl 10%)</label>
-          <input type="text" inputmode="decimal" name="potassio" value="2.00">
+          <input type="text" inputmode="decimal" name="potassio" value="">
           <span class="unidade">mEq/kg/dia</span>
         </div>
         <div class="campo">
           <label>Cálcio (Gluconato de Cálcio 10%)</label>
-          <input type="text" inputmode="numeric" name="calcio" value="200">
+          <input type="text" inputmode="numeric" name="calcio" value="">
           <span class="unidade">mg/kg/dia de gluconato de cálcio 10%</span>
         </div>
       </div>
@@ -576,7 +576,7 @@
         </div>
         <div class="campo">
           <label>Concentração Desejada</label>
-          <input type="number" step="0.1" min="0" max="50" name="cd" value="10">
+          <input type="text" inputmode="decimal" name="cd" value="10">
           <span class="unidade">% glicose</span>
         </div>
         <div class="campo">
@@ -639,7 +639,7 @@
   Este software e todas as informações nele contidas são fornecidos exclusivamente com propósitos educacionais e de auxílio à referência médica. ESTE SISTEMA NÃO SUBSTITUI O JULGAMENTO CLÍNICO INDIVIDUAL, A ANAMNESE E O EXAME FÍSICO. As informações aqui apresentadas não devem ser utilizadas isoladamente para o diagnóstico, conduta ou tratamento de pacientes. A responsabilidade final por qualquer decisão clínica, prescrição ou intervenção é exclusiva do profissional de saúde assistente, devidamente habilitado. Os desenvolvedores não garantem a precisão absoluta de todos os dados e isentam-se de responsabilidade por quaisquer danos diretos, indiretos, materiais ou morais que resultem do uso inadequado, interpretação equivocada ou confiança exclusiva nas informações deste sistema. Pacientes e indivíduos leigos que utilizarem este software devem sempre buscar a orientação de um médico qualificado antes de tomar qualquer decisão sobre sua saúde.
 
 </div>
-<div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong></div>
+<div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong><br><span class="version-name">1.09.07.16</span></div>
 
 <div class="spacer-3lines" aria-hidden="true"></div>
 
@@ -798,32 +798,74 @@
   }
 
   // Máscaras decimais simples por campo: nº de dígitos inteiros e decimais.
+  // Durante a digitação, aceita apenas números e um separador decimal opcional (. ou ,).
+  // Se o usuário começar por ponto/vírgula, interpreta como 0,.
+  // Sem separador digitado, insere a vírgula quando ultrapassa o limite de inteiros.
+  // Ex.: #,## -> 1; 12 -> 1,2; 123 -> 1,23.
+  // Ex.: ##,## -> 1; 12 -> 12; 123 -> 12,3; 1234 -> 12,34.
   var DECIMAL_MASK_FIELDS = {
-    volume:   { intDigits: 3, decDigits: 2 }, // ###.##
-    sodio:    { intDigits: 2, decDigits: 2 }, // ##.##
-    potassio: { intDigits: 2, decDigits: 2 }, // ##.##
-    calcio:   { intDigits: 4, decDigits: 0 }  // #### (sem casa decimal)
+    volume:         { intDigits: 3, decDigits: 2 }, // ###.##
+    sodio:          { intDigits: 2, decDigits: 2 }, // ##.##
+    potassio:       { intDigits: 2, decDigits: 2 }, // ##.##
+    calcio:         { intDigits: 4, decDigits: 0 }, // #### (sem casa decimal)
+    volumetotal:    { intDigits: 3, decDigits: 2 }, // ###.##
+    sodiototal:     { intDigits: 2, decDigits: 2 }, // ##.##
+    potassiototal:  { intDigits: 2, decDigits: 2 }, // ##.##
+    calciototal:    { intDigits: 2, decDigits: 2 }, // ##.##
+    volt:           { intDigits: 3, decDigits: 2 }, // ###.##
+    mlhora:         { intDigits: 2, decDigits: 2 }, // ##.##
+    volume1:        { intDigits: 3, decDigits: 2 }, // ###.##
+    volume2:        { intDigits: 3, decDigits: 2 }, // ###.##
+    volume3:        { intDigits: 3, decDigits: 2 }, // ###.##
+    cd:             { intDigits: 2, decDigits: 2 }, // ##.##
+    vs1:            { intDigits: 3, decDigits: 2 }, // ###.##
+    vs2:            { intDigits: 3, decDigits: 2 }, // ###.##
+    tig:            { intDigits: 2, decDigits: 2 }  // ##.##
   };
 
   function maskDecimalInputValue(rawValue, intDigits, decDigits) {
-    var str = String(rawValue == null ? "" : rawValue).replace(/,/g, ".").replace(/[^0-9.]/g, "");
-    if (str === "") return "";
+    var maxIntegerDigits = Math.max(0, intDigits);
+    var maxDecimalDigits = Math.max(0, decDigits);
+    var value = String(rawValue == null ? "" : rawValue);
 
     // Campo sem casa decimal: mantém apenas dígitos inteiros.
-    if (decDigits <= 0) {
-      return str.replace(/\./g, "").slice(0, intDigits);
+    if (maxDecimalDigits <= 0) {
+      return value.replace(/\D/g, "").slice(0, maxIntegerDigits);
     }
 
-    var firstDot = str.indexOf(".");
-    var hasDot = firstDot !== -1;
-    var intPart = hasDot ? str.slice(0, firstDot) : str;
-    var decPart = hasDot ? str.slice(firstDot + 1).replace(/\./g, "") : "";
+    var firstSeparatorIndex = value.search(/[,.]/);
 
-    intPart = intPart.replace(/\./g, "").slice(0, intDigits);
-    decPart = decPart.slice(0, decDigits);
+    // Quando o usuário digita vírgula/ponto explicitamente, respeita a posição manual do separador.
+    // "," ou "." no início viram "0,".
+    // Após o separador, aceita somente as casas decimais restantes da máscara.
+    // Ex.: ##,## -> "1,2" mantém "1,2" e aceita só mais 1 dígito; "1,234" vira "1,23".
+    if (firstSeparatorIndex !== -1) {
+      var rawIntegerPart = value.slice(0, firstSeparatorIndex).replace(/\D/g, "");
+      var rawDecimalPart = value.slice(firstSeparatorIndex + 1).replace(/\D/g, "");
+      var integerPart = rawIntegerPart === "" ? "0" : rawIntegerPart.slice(0, maxIntegerDigits);
+      var decimalPart = rawDecimalPart.slice(0, maxDecimalDigits);
 
-    if (intPart === "" && !hasDot) return "";
-    return hasDot ? intPart + "." + decPart : intPart;
+      return integerPart + "," + decimalPart;
+    }
+
+    var maxDigits = maxIntegerDigits + maxDecimalDigits;
+    var digits = value.replace(/\D/g, "");
+
+    if (digits === "") return "";
+    if (maxDigits > 0) digits = digits.slice(0, maxDigits);
+
+    // Máscara automática posicional sem separador digitado:
+    // mantém os dígitos inteiros livres até o limite da máscara e só então
+    // desloca os dígitos excedentes para as casas decimais.
+    // Ex.: #,##   -> 1; 12 -> 1,2; 123 -> 1,23.
+    // Ex.: ##,##  -> 1; 12 -> 12; 123 -> 12,3; 1234 -> 12,34.
+    // Ex.: ###,## -> 1; 12 -> 12; 123 -> 123; 1234 -> 123,4; 12345 -> 123,45.
+    var decimalPlaces = Math.min(maxDecimalDigits, Math.max(0, digits.length - maxIntegerDigits));
+    var integerLength = digits.length - decimalPlaces;
+    var integerPart = digits.slice(0, integerLength);
+    var decimalPart = digits.slice(integerLength);
+
+    return decimalPart ? integerPart + "," + decimalPart : integerPart;
   }
 
   function formatField(name, value, snapshot) {
@@ -1090,6 +1132,17 @@
     return Number.isFinite(parsed) ? parsed : fallback;
   }
 
+  function parseFieldValueForCalculation(name, rawValue, fallback) {
+    var text = String(rawValue == null ? "" : rawValue).trim();
+    var parsed = parseDecimal(text);
+
+    // Fora do clique em Calcular, campo vazio deve continuar vazio na tela.
+    // A conversão de vazio para 0 dos campos opcionais diretos ocorre apenas
+    // em parseDirectFieldForCalculate(), usado pelo botão Calcular.
+    if (!Number.isFinite(parsed) && Number.isFinite(fallback)) return fallback;
+    return parsed;
+  }
+
 
   function chooseGlucosePairForCd(cd) {
     if (!Number.isFinite(cd) || cd < 0 - EPS || cd > 50 + EPS) {
@@ -1156,10 +1209,10 @@
       clinical: {
         peso: readSanitizedNumericField("peso", 0),
         etapas: readSanitizedNumericField("etapas", 1),
-        volume: readSanitizedNumericField("volume", 0),
-        sodio: readSanitizedNumericField("sodio", 0),
-        potassio: readSanitizedNumericField("potassio", 0),
-        calcio: readSanitizedNumericField("calcio", 0),
+        volume: parseDirectFieldForCalculate("volume", 0),
+        sodio: parseDirectFieldForCalculate("sodio", 0),
+        potassio: parseDirectFieldForCalculate("potassio", 0),
+        calcio: parseDirectFieldForCalculate("calcio", 0),
         concso: readSelectNumber("concso", 2)
       },
       prescricao: {
@@ -1960,7 +2013,11 @@
       // Durante digitação contínua, preserva apenas o campo ativo para não
       // transformar "7" em "7.0" antes do usuário terminar de digitar.
       if (name !== skipName) {
-        form[name].value = displayValue;
+        if (options && options.preserveEmptyInputFields && options.preserveEmptyInputFields[name]) {
+          form[name].value = "";
+        } else {
+          form[name].value = displayValue;
+        }
       }
       form[name].dataset.role = FIELD_META[name].role;
       form[name].title = getFieldRoleTitle(FIELD_META[name].role);
@@ -2049,6 +2106,124 @@
     );
   }
 
+  var REQUIRED_DIRECT_FIELDS = ["peso"];
+  var EMPTY_ON_START_FIELDS = ["peso", "volume", "sodio", "potassio", "calcio"];
+  var EMPTY_AS_ZERO_ON_CALCULATE_FIELDS = ["volume", "sodio", "potassio", "calcio"];
+  var CLEAR_RESULT_FIELDS = [
+    "volumetotal",
+    "sodiototal",
+    "potassiototal",
+    "calciototal",
+    "peso1",
+    "volt",
+    "tempohoras",
+    "mlhora",
+    "osmolaridade",
+    "volume1",
+    "volume2",
+    "volume3",
+    "vs1",
+    "vs2",
+    "tig"
+  ];
+
+  function hasRequiredDirectFieldsFilled() {
+    return REQUIRED_DIRECT_FIELDS.every(function (name) {
+      return !!(form[name] && String(form[name].value || "").trim() !== "");
+    });
+  }
+
+  function getMissingRequiredDirectLabels() {
+    var labels = {
+      peso: "Peso de Cálculo"
+    };
+
+    return REQUIRED_DIRECT_FIELDS
+      .filter(function (name) {
+        return !(form[name] && String(form[name].value || "").trim() !== "");
+      })
+      .map(function (name) { return labels[name] || name; });
+  }
+
+
+  function isWeightRequiredFieldEmpty() {
+    return !(form.peso && String(form.peso.value || "").trim() !== "");
+  }
+
+  function assertWeightBeforeCalculate() {
+    if (isWeightRequiredFieldEmpty()) {
+      throw new Error("Informe o Peso de Cálculo antes de calcular.");
+    }
+  }
+
+  function getEmptyFieldMap(names) {
+    var map = {};
+    names.forEach(function (name) {
+      map[name] = !!(form[name] && String(form[name].value || "").trim() === "");
+    });
+    return map;
+  }
+
+  function parseDirectFieldForCalculate(name, fallback) {
+    var text = String(form[name] && form[name].value != null ? form[name].value : "").trim();
+    var parsed = parseDecimal(text);
+    if (!Number.isFinite(parsed) && EMPTY_AS_ZERO_ON_CALCULATE_FIELDS.indexOf(name) >= 0 && text === "") {
+      parsed = 0;
+    }
+    if (!Number.isFinite(parsed) && Number.isFinite(fallback)) return fallback;
+    return sanitizeInputValue(name, parsed);
+  }
+
+  function hideAlertElement(elementId) {
+    var alertElement = document.getElementById(elementId);
+    if (!alertElement) return;
+    alertElement.classList.add("is-hidden");
+    alertElement.innerHTML = "";
+  }
+
+  function applyEmptyInitialDisplay() {
+    updating = true;
+
+    EMPTY_ON_START_FIELDS.forEach(function (name) {
+      if (form[name]) form[name].value = "";
+    });
+
+    CLEAR_RESULT_FIELDS.forEach(function (name) {
+      if (form[name]) form[name].value = "";
+    });
+
+    if (form.concso) form.concso.value = "2";
+    if (form.concsodio) form.concsodio.value = "2";
+    if (form.etapas) form.etapas.value = "1";
+    if (form.etapas2) form.etapas2.value = "1";
+    if (form.cd) form.cd.value = "10";
+    if (form.cs1) form.cs1.value = "5";
+    if (form.cs2) form.cs2.value = "10";
+
+    Object.keys(FIELD_META).forEach(function (name) {
+      if (!form[name]) return;
+      form[name].dataset.role = FIELD_META[name].role;
+      form[name].title = getFieldRoleTitle(FIELD_META[name].role);
+      if (name === "tempohoras" || name === "osmolaridade") {
+        form[name].readOnly = true;
+        form[name].tabIndex = -1;
+      }
+    });
+
+    hideAlertElement("alertaSolucao");
+    hideAlertElement("alertaAjusteAutomaticoMistura");
+    hideAlertElement("alertaMistura");
+    hideErrorToast();
+
+    updating = false;
+  }
+
+  function resetToEmptyInitialState() {
+    applyEmptyInitialDisplay();
+    initialRawState = createStateFromForm();
+    state = deepClone(initialRawState);
+  }
+
   function fail(error, preserveForm) {
     if (!preserveForm) render(state);
     showErrorToast(error && error.message ? error.message : String(error));
@@ -2128,15 +2303,36 @@
   function updateFromUserField(name, rawValue, renderOptions) {
     if (!FIELD_META[name]) throw new Error("Campo não mapeado.");
 
-    var parsed = parseDecimal(rawValue);
+    var parsed = parseFieldValueForCalculation(name, rawValue, 0);
     if (!Number.isFinite(parsed)) {
       throw new Error("Valor numérico inválido.");
     }
 
     atomic(function (candidate) {
-      setByPath(candidate, FIELD_META[name].path, parsed);
-      sanitizeFieldInState(name, candidate);
-      computeByIntent(candidate, getIntentForField(name));
+      var intent = getIntentForField(name);
+
+      // Quando os campos de entrada direta começam vazios, o usuário pode preencher
+      // peso/volume/eletrólitos em qualquer ordem. Apenas o peso é obrigatório;
+      // volume, sódio, potássio e cálcio vazios entram como 0 no cálculo. Ao confirmar
+      // qualquer campo de entrada direta, relemos TODOS os campos diretos visíveis
+      // do DOM antes de calcular. Isso evita reaproveitar estado antigo e evita falso
+      // erro de "Peso < 0,3 kg" quando a tela mostra, por exemplo, 3,333 kg.
+      if (intent === INTENT.DIRECT) {
+        ["peso", "etapas", "volume", "sodio", "potassio", "calcio", "concso"].forEach(function (directName) {
+          if (!FIELD_META[directName] || !form[directName]) return;
+          var directParsed = parseFieldValueForCalculation(directName, form[directName].value, 0);
+          if (!Number.isFinite(directParsed)) {
+            throw new Error("Valor numérico inválido.");
+          }
+          setByPath(candidate, FIELD_META[directName].path, directParsed);
+          sanitizeFieldInState(directName, candidate);
+        });
+      } else {
+        setByPath(candidate, FIELD_META[name].path, parsed);
+        sanitizeFieldInState(name, candidate);
+      }
+
+      computeByIntent(candidate, intent);
     }, renderOptions);
   }
 
@@ -2220,7 +2416,9 @@
     if (updating) return;
 
     try {
-      var rawPeso = parseDecimal(form.peso && form.peso.value);
+      assertWeightBeforeCalculate();
+      var preserveEmptyInputFields = getEmptyFieldMap(EMPTY_AS_ZERO_ON_CALCULATE_FIELDS);
+      var rawPeso = parseFieldValueForCalculation("peso", form.peso && form.peso.value, 0);
       var candidate = createStateFromForm();
       if (Number.isFinite(rawPeso) && rawPeso > MAX_WEIGHT_KG && candidate && candidate.clinical && Math.abs(candidate.clinical.peso - rawPeso) > EPS) {
         if (!candidate._meta) candidate._meta = {};
@@ -2230,7 +2428,7 @@
         };
       }
       computeDirect(candidate);
-      commit(candidate);
+      commit(candidate, { preserveEmptyInputFields: preserveEmptyInputFields });
       if (targetSectionId) {
         scrollSectionToTop(targetSectionId);
       }
@@ -2247,7 +2445,16 @@
       var triggerFieldUpdate = function (options) {
         if (updating) return;
         var soft = !!(options && options.soft);
-        var parsed = parseDecimal(el.value);
+        var intent = getIntentForField(name);
+
+        // Campos diretos de entrada clínica não recalculam no blur/change.
+        // A regra de campo vazio = 0 vale apenas quando o usuário clica em Calcular.
+        // Fora disso, a tela preserva campo vazio como vazio e campo preenchido como está.
+        if (intent === INTENT.DIRECT) {
+          return;
+        }
+
+        var parsed = parseFieldValueForCalculation(name, el.value, 0);
 
         if (!Number.isFinite(parsed)) {
           if (!soft) render(state);
@@ -2293,7 +2500,8 @@
             el.dataset.weightLastValid = masked;
           });
         } else if (DECIMAL_MASK_FIELDS[name]) {
-          // Máscaras decimais: volume ###.## | sódio/potássio ##.## | cálcio ####
+          // Máscaras decimais configuradas em DECIMAL_MASK_FIELDS.
+          // A digitação aceita números e separador decimal inicial/opcional (. ou ,).
           var maskSpec = DECIMAL_MASK_FIELDS[name];
           el.addEventListener("input", (function (spec) {
             return function () {
@@ -2309,7 +2517,8 @@
         }
 
         // Campos digitáveis não recalculam durante a digitação.
-        // O cálculo é confirmado apenas ao sair do campo.
+        // Campos diretos são recalculados apenas pelo botão Calcular; campos inversos/reversos
+        // continuam sendo confirmados ao sair do campo.
         el.addEventListener("blur", function () { triggerFieldUpdate({ soft: false }); });
       }
     });
@@ -2330,25 +2539,13 @@
 
     form.addEventListener("reset", function (event) {
       event.preventDefault();
-      try {
-        var candidate = deepClone(initialRawState || createStateFromForm());
-        computeDirect(candidate);
-        commit(candidate);
-        window.requestAnimationFrame(function () {
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-          });
+      resetToEmptyInitialState();
+      window.requestAnimationFrame(function () {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
         });
-      } catch (error) {
-        fail(error, false);
-        window.requestAnimationFrame(function () {
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-          });
-        });
-      }
+      });
     });
   }
 
@@ -2525,6 +2722,27 @@
       if (formatField("volume", snapshot.clinical.volume, snapshot) !== "70.00") {
         throw new Error("Volume clínico não deve derivar para 70,1 após ciclos direto/inverso.");
       }
+    });
+
+    tests.push(function testAutomaticDecimalMasks() {
+      if (maskDecimalInputValue("1", 1, 2) !== "1") throw new Error("Máscara #,##: 1 deve permanecer 1.");
+      if (maskDecimalInputValue("12", 1, 2) !== "1,2") throw new Error("Máscara #,##: 12 deve virar 1,2.");
+      if (maskDecimalInputValue("123", 1, 2) !== "1,23") throw new Error("Máscara #,##: 123 deve virar 1,23.");
+
+      if (maskDecimalInputValue("1", 2, 2) !== "1") throw new Error("Máscara ##,##: 1 deve permanecer 1.");
+      if (maskDecimalInputValue("12", 2, 2) !== "12") throw new Error("Máscara ##,##: 12 deve permanecer 12.");
+      if (maskDecimalInputValue("123", 2, 2) !== "12,3") throw new Error("Máscara ##,##: 123 deve virar 12,3.");
+      if (maskDecimalInputValue("1234", 2, 2) !== "12,34") throw new Error("Máscara ##,##: 1234 deve virar 12,34.");
+      if (maskDecimalInputValue("12345", 2, 2) !== "12,34") throw new Error("Máscara ##,## deve limitar a 4 dígitos totais.");
+
+      if (maskDecimalInputValue("1", 3, 2) !== "1") throw new Error("Máscara ###,##: 1 deve permanecer 1.");
+      if (maskDecimalInputValue("12", 3, 2) !== "12") throw new Error("Máscara ###,##: 12 deve permanecer 12.");
+      if (maskDecimalInputValue("123", 3, 2) !== "123") throw new Error("Máscara ###,##: 123 deve permanecer 123.");
+      if (maskDecimalInputValue("1234", 3, 2) !== "123,4") throw new Error("Máscara ###,##: 1234 deve virar 123,4.");
+      if (maskDecimalInputValue("12345", 3, 2) !== "123,45") throw new Error("Máscara ###,##: 12345 deve virar 123,45.");
+      if (maskDecimalInputValue("12a3b45", 3, 2) !== "123,45") throw new Error("Máscara deve aceitar apenas números e remover letras.");
+
+      if (maskDecimalInputValue("12345", 4, 0) !== "1234") throw new Error("Máscara inteira deve manter apenas dígitos inteiros permitidos.");
     });
 
     tests.push(function testReverseModes() {
@@ -2786,15 +3004,7 @@
   function bootstrap() {
     initializeCollapsibleSections();
 
-    initialRawState = createStateFromForm();
-    state = deepClone(initialRawState);
-
-    try {
-      computeDirect(state);
-      commit(state);
-    } catch (error) {
-      showErrorToast(error.message || String(error));
-    }
+    resetToEmptyInitialState();
 
     try {
       window.HidraCalculator.selfTest = runSelfTests();
