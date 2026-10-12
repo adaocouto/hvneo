@@ -1,4 +1,6 @@
 <!-- NomeDoApp = "Hidratação Venosa Neonatal" -->
+<!-- AndroidVersionName = "1.11.10.9" -->
+<!-- AndroidVersionCode = "262820547"; Timestamp = "2026-10-09T05:47:00-03:00" -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -356,20 +358,69 @@
       height: 1em;
     }
   
-    .legal-disclaimer {
-      margin: 16px auto 0;
-      max-width: 820px;
-      font-size: 12px;
-      line-height: 1.2;
-      color: #5c6f87;
-      text-align: justify;
-      word-break: break-word;
-      background: var(--branco, #ffffff);
-      border: 1px solid var(--borda, #cddbea);
-      border-radius: 22px;
-      box-shadow: 0 16px 34px rgba(18, 44, 73, 0.10);
-      padding: 16px;
-    }
+
+
+    .legal-disclaimer{
+          margin: 16px 0 0;
+          font-size: 12px;
+          line-height: 1.2;
+          color: #5c6f87;
+          text-align: justify;
+          word-break: break-word;
+          background: var(--surface, #ffffff);
+          border: 1px solid var(--border, #cddbea);
+          border-radius: var(--radius-xl, 22px);
+          box-shadow: var(--shadow, 0 16px 34px rgba(18, 44, 73, 0.10));
+          padding: 16px;
+        }
+    
+    .legal-disclaimer{
+          margin-top:16px;
+          padding:0;
+          border:1px solid #e2e8f0;
+          border-radius:14px;
+          background:#f8fafc;
+          box-shadow:none;
+          color:#64748b;
+          font-size:.76rem;
+          line-height:1.45;
+          text-align:left;
+          overflow:hidden;
+        }
+    
+    .legal-disclaimer > summary{
+          list-style:none;
+          cursor:pointer;
+          position:relative;
+          padding:11px 38px 11px 13px;
+          color:#5c6f87;
+          font-size:.78rem;
+          font-weight:700;
+          user-select:none;
+        }
+    
+    .legal-disclaimer > summary::-webkit-details-marker{display:none}
+    
+    .legal-disclaimer > summary::after{
+          content:'＋';
+          position:absolute;
+          right:13px;
+          top:50%;
+          transform:translateY(-50%);
+          color:#7b8da0;
+          font-size:.9rem;
+          font-weight:800;
+        }
+    
+    .legal-disclaimer[open] > summary::after{content:'−'}
+    
+    .legal-disclaimer-content{
+          padding:0 13px 12px;
+          border-top:1px solid #edf2f7;
+          padding-top:11px;
+          text-align:justify;
+          overflow-wrap:anywhere;
+        }
 
     .signature-block {
       max-width: 820px;
@@ -383,6 +434,90 @@
     .spacer-3lines {
       height: 4.2em;
     }
+
+
+    /* Prescrição — mesmo molde do Resumo Medicamentoso do PedHelp */
+    .prontuario-content{position:relative;min-width:0}
+    .prontuario-textarea{
+      display:block;
+      width:100%;
+      max-width:none;
+      min-height:280px;
+      height:clamp(280px,45vh,380px);
+      resize:vertical;
+      margin:0;
+      border:1px solid #bfd2e4;
+      border-radius:14px;
+      padding:14px 16px;
+      background:#fcfeff;
+      color:var(--texto);
+      line-height:1.45;
+      font-family:inherit;
+      font-size:.9rem;
+      outline:none;
+    }
+    .prontuario-textarea:focus{
+      border-color:var(--azul-med);
+      box-shadow:0 0 0 4px rgba(37,99,168,.12);
+    }
+    .prontuario-actions{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+    }
+    .prontuario-actions button{
+      width:100%;
+      min-width:0;
+      min-height:46px;
+      margin:0;
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      line-height:1.2;
+      font-size:.9rem;
+    }
+    .prontuario-actions #gerarResumoHidratacao{grid-column:1/-1}
+    .btn-tertiary{
+      background:transparent;
+      color:#5c6f87;
+      border:1px solid #dbe5ee;
+    }
+    .btn-tertiary:active{background:#f5f8fb}
+    .prontuario-toast{
+      position:fixed;
+      left:50%;
+      bottom:calc(max(16px,env(safe-area-inset-bottom)) + 62px);
+      z-index:1800;
+      max-width:min(340px,calc(100vw - 32px));
+      padding:8px 12px;
+      border:1px solid #cbdbea;
+      border-radius:999px;
+      background:rgba(255,255,255,.98);
+      color:#173a6d;
+      box-shadow:0 10px 28px rgba(15,23,42,.18);
+      font-size:.8rem;
+      font-weight:700;
+      text-align:center;
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform:translate(-50%,8px);
+      transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
+    }
+    .prontuario-toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+    @media(max-width:560px){
+      .prontuario-textarea{
+        min-height:300px;
+        height:clamp(300px,50vh,420px);
+        padding:13px 14px;
+        font-size:.9rem;
+      }
+      .prontuario-actions{grid-template-columns:1fr 1fr}
+    }
+
   </style>
 </head>
 <body>
@@ -411,7 +546,7 @@
       <div class="grid-2">
         <div class="campo">
           <label>Peso de Cálculo</label>
-          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso" value="">
+          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso" value="2,800">
           <span class="unidade">kg</span>
         </div>
         <div class="campo">
@@ -429,7 +564,7 @@
         </div>
         <div class="campo">
           <label>Volume</label>
-          <input type="text" inputmode="decimal" name="volume" value="">
+          <input type="text" inputmode="decimal" name="volume" value="100">
           <span class="unidade">ml/kg/dia</span>
         </div>
         <div class="campo">
@@ -439,18 +574,18 @@
               <option value="1">10%</option>
               <option value="2" selected>20%</option>
             </select>
-            <input type="text" inputmode="decimal" name="sodio" value="">
+            <input type="text" inputmode="decimal" name="sodio" value="3">
           </div>
           <span class="unidade">mEq/kg/dia</span>
         </div>
         <div class="campo">
           <label>Potássio (KCl 10%)</label>
-          <input type="text" inputmode="decimal" name="potassio" value="">
+          <input type="text" inputmode="decimal" name="potassio" value="2">
           <span class="unidade">mEq/kg/dia</span>
         </div>
         <div class="campo">
           <label>Cálcio (Gluconato de Cálcio 10%)</label>
-          <input type="text" inputmode="numeric" name="calcio" value="">
+          <input type="text" inputmode="numeric" name="calcio" value="300">
           <span class="unidade">mg/kg/dia de gluconato de cálcio 10%</span>
         </div>
       </div>
@@ -465,9 +600,67 @@
     </div>
   </div>
 
-  <!-- ====== SEÇÃO 2: PRESCRIÇÃO POR ETAPA ====== -->
+  <!-- ====== SEÇÃO 2: MISTURA DE GLICOSE ====== -->
+  <details class="secao secao-collapsible" id="secaoMistura">
+    <summary class="secao-header">② Mistura de Soluções Glicosadas</summary>
+    <div class="secao-body">
+      <div class="grid-2">
+        <div class="campo">
+          <label>Volume base glicosado por Etapa</label>
+          <input type="text" name="volume3" value="0" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>Concentração Desejada</label>
+          <input type="text" inputmode="decimal" name="cd" value="10">
+          <span class="unidade">% glicose</span>
+        </div>
+        <div class="campo">
+          <label>Concentração do 1º Soro (menor)</label>
+          <select name="cs1">
+            <option value="0">0% (Água destilada)</option>
+            <option value="5" selected>5%</option>
+            <option value="10">10%</option>
+            <option value="25">25%</option>
+            <option value="50">50%</option>
+          </select>
+          <span class="unidade">% glicose</span>
+        </div>
+        <div class="campo">
+          <label>Volume do 1º Soro</label>
+          <input type="text" name="vs1" value="0" class="resultado-amarelo" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>Concentração do 2º Soro (maior)</label>
+          <select name="cs2">
+            <option value="0">0% (Água destilada)</option>
+            <option value="5">5%</option>
+            <option value="10" selected>10%</option>
+            <option value="25">25%</option>
+            <option value="50">50%</option>
+          </select>
+          <span class="unidade">% glicose</span>
+        </div>
+        <div class="campo">
+          <label>Volume do 2º Soro</label>
+          <input type="text" name="vs2" value="0" class="resultado-amarelo" inputmode="decimal">
+          <span class="unidade">ml</span>
+        </div>
+        <div class="campo">
+          <label>T.I.G.</label>
+          <input type="text" name="tig" value="0" class="resultado-verde" inputmode="decimal">
+          <span class="unidade">mg/kg/minuto</span>
+        </div>
+      </div>
+      <div id="alertaAjusteAutomaticoMistura" class="alerta-solucao alerta-ajuste-automatico is-hidden" role="alert" aria-live="assertive"></div>
+      <div id="alertaMistura" class="alerta-solucao is-hidden" role="alert" aria-live="polite"></div>
+    </div>
+  </details>
+
+  <!-- ====== SEÇÃO 3: PRESCRIÇÃO POR ETAPA ====== -->
   <div class="secao" id="secaoPrescricao">
-    <div class="secao-header">② Prescrição por Etapa</div>
+    <div class="secao-header">③ Prescrição por Etapa</div>
     <div class="secao-body">
       <div class="grid-2">
         <div class="campo">
@@ -564,82 +757,33 @@
     </div>
   </div>
 
-  <!-- ====== SEÇÃO 3: MISTURA DE GLICOSE ====== -->
-  <details class="secao secao-collapsible" id="secaoMistura" open>
-    <summary class="secao-header">③ Mistura de Soluções Glicosadas</summary>
+  <!-- ====== PRESCRIÇÃO ====== -->
+  <details class="secao secao-collapsible" id="secaoResumoHidratacao" open>
+    <summary class="secao-header">④ Prescrição</summary>
     <div class="secao-body">
-      <div class="grid-2">
-        <div class="campo">
-          <label>Volume base glicosado por Etapa</label>
-          <input type="text" name="volume3" value="0" inputmode="decimal">
-          <span class="unidade">ml</span>
+      <div class="prontuario-content">
+        <textarea id="prescricaoEtapaTexto" rows="12" class="prontuario-textarea" placeholder="A prescrição da hidratação será montada automaticamente conforme os cálculos atuais."></textarea>
+        <div class="prontuario-actions">
+          <button type="button" class="btn btn-primary" id="gerarResumoHidratacao">Gerar Prescrição</button>
+          <button type="button" class="btn btn-secondary" id="copiarResumoHidratacao">Copiar Prescrição</button>
+          <button type="button" class="btn btn-tertiary" id="limparResumoHidratacao">Limpar</button>
         </div>
-        <div class="campo">
-          <label>Concentração Desejada</label>
-          <input type="text" inputmode="decimal" name="cd" value="10">
-          <span class="unidade">% glicose</span>
-        </div>
-        <div class="campo">
-          <label>Concentração do 1º Soro (menor)</label>
-          <select name="cs1">
-            <option value="0">0% (Água destilada)</option>
-            <option value="5" selected>5%</option>
-            <option value="10">10%</option>
-            <option value="25">25%</option>
-            <option value="50">50%</option>
-          </select>
-          <span class="unidade">% glicose</span>
-        </div>
-        <div class="campo">
-          <label>Volume do 1º Soro</label>
-          <input type="text" name="vs1" value="0" class="resultado-amarelo" inputmode="decimal">
-          <span class="unidade">ml</span>
-        </div>
-        <div class="campo">
-          <label>Concentração do 2º Soro (maior)</label>
-          <select name="cs2">
-            <option value="0">0% (Água destilada)</option>
-            <option value="5">5%</option>
-            <option value="10" selected>10%</option>
-            <option value="25">25%</option>
-            <option value="50">50%</option>
-          </select>
-          <span class="unidade">% glicose</span>
-        </div>
-        <div class="campo">
-          <label>Volume do 2º Soro</label>
-          <input type="text" name="vs2" value="0" class="resultado-amarelo" inputmode="decimal">
-          <span class="unidade">ml</span>
-        </div>
-        <div class="campo">
-          <label>T.I.G.</label>
-          <input type="text" name="tig" value="0" class="resultado-verde" inputmode="decimal">
-          <span class="unidade">mg/kg/minuto</span>
-        </div>
+        <div class="prontuario-toast" id="prescricaoEtapaCopyStatus" aria-live="polite" aria-atomic="true"></div>
       </div>
-      <div id="alertaAjusteAutomaticoMistura" class="alerta-solucao alerta-ajuste-automatico is-hidden" role="alert" aria-live="assertive"></div>
-      <div id="alertaMistura" class="alerta-solucao is-hidden" role="alert" aria-live="polite"></div>
     </div>
   </details>
-
-  <!-- ====== BOTÕES INFERIORES ====== -->
-  <div class="btn-row" style="justify-content:center;">
-    <button type="button" class="btn btn-primary" id="btnCalcularRodape">
-      Calcular
-    </button>
-    <button type="reset" class="btn btn-reset">Limpar Dados</button>
-  </div>
 
 </div><!-- /wrapper -->
 </form>
 
 
-<div class="legal-disclaimer">
-  <strong>Aviso Legal e Isenção de Responsabilidade:</strong><br>
-  Este software e todas as informações nele contidas são fornecidos exclusivamente com propósitos educacionais e de auxílio à referência médica. ESTE SISTEMA NÃO SUBSTITUI O JULGAMENTO CLÍNICO INDIVIDUAL, A ANAMNESE E O EXAME FÍSICO. As informações aqui apresentadas não devem ser utilizadas isoladamente para o diagnóstico, conduta ou tratamento de pacientes. A responsabilidade final por qualquer decisão clínica, prescrição ou intervenção é exclusiva do profissional de saúde assistente, devidamente habilitado. Os desenvolvedores não garantem a precisão absoluta de todos os dados e isentam-se de responsabilidade por quaisquer danos diretos, indiretos, materiais ou morais que resultem do uso inadequado, interpretação equivocada ou confiança exclusiva nas informações deste sistema. Pacientes e indivíduos leigos que utilizarem este software devem sempre buscar a orientação de um médico qualificado antes de tomar qualquer decisão sobre sua saúde.
-
-</div>
-<div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong><br><span class="version-name">1.09.07.16</span></div>
+<details class="legal-disclaimer legal-disclaimer-collapsible">
+<summary>Aviso Legal e Isenção de Responsabilidade</summary>
+<div class="legal-disclaimer-content">
+        Este software e todas as informações nele contidas são fornecidos exclusivamente com propósitos educacionais e de auxílio à referência médica. ESTE SISTEMA NÃO SUBSTITUI O JULGAMENTO CLÍNICO INDIVIDUAL, A ANAMNESE E O EXAME FÍSICO. As informações aqui apresentadas não devem ser utilizadas isoladamente para o diagnóstico, conduta ou tratamento de pacientes. A responsabilidade final por qualquer decisão clínica, prescrição ou intervenção é exclusiva do profissional de saúde assistente, devidamente habilitado. Os desenvolvedores não garantem a precisão absoluta de todos os dados e isentam-se de responsabilidade por quaisquer danos diretos, indiretos, materiais ou morais que resultem do uso inadequado, interpretação equivocada ou confiança exclusiva nas informações deste sistema. Pacientes e indivíduos leigos que utilizarem este software devem sempre buscar a orientação de um médico qualificado antes de tomar qualquer decisão sobre sua saúde.
+      </div>
+</details>
+<div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong><br><span class="version-name">1.11.10.9</span></div>
 
 <div class="spacer-3lines" aria-hidden="true"></div>
 
@@ -1997,6 +2141,148 @@
       "</li></ul>";
   }
 
+  function prescriptionTextNumber(value, decimals) {
+    if (!Number.isFinite(Number(value))) return "0";
+    var numeric = Number(value);
+    return round(numeric, decimals).toFixed(decimals).replace(".", ",");
+  }
+
+  function prescriptionFieldText(name, value, snapshot) {
+    if (!Number.isFinite(Number(value))) return "0";
+    return prescriptionTextNumber(value, getFieldDecimals(name, snapshot));
+  }
+
+  function glucoseSolutionLabel(concentration) {
+    var c = Number(concentration);
+    if (Math.abs(c) <= EPS) return "Água destilada";
+    return "S.G. " + prescriptionTextNumber(c, 0) + "%";
+  }
+
+  function buildPrescriptionStageText(snapshot) {
+    if (!snapshot || !snapshot.clinical || !(Number(snapshot.clinical.peso) > 0)) return "";
+
+    var lines = [];
+    var vs1 = safeNonNegative(snapshot.mistura.vs1);
+    var vs2 = safeNonNegative(snapshot.mistura.vs2);
+
+    if (vs1 > EPS) {
+      lines.push(glucoseSolutionLabel(snapshot.mistura.cs1) + " - " + prescriptionFieldText("vs1", vs1, snapshot) + " mL");
+    }
+    if (vs2 > EPS) {
+      lines.push(glucoseSolutionLabel(snapshot.mistura.cs2) + " - " + prescriptionFieldText("vs2", vs2, snapshot) + " mL");
+    }
+    if (vs1 <= EPS && vs2 <= EPS && safeNonNegative(snapshot.prescricao.volumetotal) > EPS) {
+      lines.push("S.G. " + prescriptionFieldText("cd", snapshot.mistura.cd, snapshot) + "% - " +
+        prescriptionFieldText("volumetotal", snapshot.prescricao.volumetotal, snapshot) + " mL");
+    }
+
+    var sodiumConcentration = Number(snapshot.prescricao.concsodio) === 1 ? 10 : 20;
+    lines.push("NaCl " + sodiumConcentration + "% - " +
+      prescriptionFieldText("sodiototal", snapshot.prescricao.sodiototal, snapshot) + " mL");
+    lines.push("KCl 10% - " +
+      prescriptionFieldText("potassiototal", snapshot.prescricao.potassiototal, snapshot) + " mL");
+    lines.push("Gluconato de Ca 10% - " +
+      prescriptionFieldText("calciototal", snapshot.prescricao.calciototal, snapshot) + " mL");
+
+    lines.push("");
+    lines.push("Volume Total = " + prescriptionFieldText("volt", snapshot.derivados.volt, snapshot) + " mL");
+
+    var intervalHours = safeNonNegative(snapshot.derivados.tempohoras);
+    var intervalText = Number.isInteger(intervalHours) ? String(intervalHours) : prescriptionTextNumber(intervalHours, 1);
+
+    lines.push("Infundir a " + prescriptionFieldText("mlhora", snapshot.derivados.mlhora, snapshot) +
+      " mL/hora de " + intervalText + "/" + intervalText + " horas");
+    lines.push("TIG = " + prescriptionFieldText("tig", snapshot.mistura.tig, snapshot) + " mg/kg/minuto");
+
+    return lines.join("\n");
+  }
+
+  function renderPrescriptionStageText(snapshot) {
+    var display = document.getElementById("prescricaoEtapaTexto");
+    if (!display) return;
+    display.value = buildPrescriptionStageText(snapshot);
+  }
+
+  function copyPrescriptionTextFallback(copyText) {
+    var helper = document.createElement("textarea");
+    helper.value = copyText;
+    helper.setAttribute("readonly", "");
+    helper.style.position = "fixed";
+    helper.style.left = "-9999px";
+    helper.style.top = "0";
+    document.body.appendChild(helper);
+    helper.focus();
+    helper.select();
+    var copied = false;
+    try { copied = !!document.execCommand("copy"); } catch (_) {}
+    helper.remove();
+    return copied;
+  }
+
+  function bindPrescriptionStageCopy() {
+    var generateButton = document.getElementById("gerarResumoHidratacao");
+    var copyButton = document.getElementById("copiarResumoHidratacao");
+    var clearButton = document.getElementById("limparResumoHidratacao");
+    var display = document.getElementById("prescricaoEtapaTexto");
+    var status = document.getElementById("prescricaoEtapaCopyStatus");
+    if (!display) return;
+
+    var statusTimer = null;
+    function showStatus(message, duration) {
+      if (!status) return;
+      if (statusTimer) clearTimeout(statusTimer);
+      status.textContent = message || "";
+      status.classList.toggle("show", Boolean(message));
+      if (message) {
+        statusTimer = setTimeout(function () {
+          status.classList.remove("show");
+          setTimeout(function () { status.textContent = ""; }, 220);
+        }, duration || 1800);
+      }
+    }
+
+    if (generateButton && generateButton.dataset.bound !== "true") {
+      generateButton.dataset.bound = "true";
+      generateButton.addEventListener("click", function () {
+        display.value = buildPrescriptionStageText(state);
+        showStatus("Prescrição atualizada.", 1500);
+      });
+    }
+
+    if (copyButton && copyButton.dataset.bound !== "true") {
+      copyButton.dataset.bound = "true";
+      copyButton.addEventListener("click", function () {
+        if (!display.value.trim()) display.value = buildPrescriptionStageText(state);
+        var copyText = display.value || "";
+        if (!copyText.trim()) {
+          showStatus("Aguardando cálculo.", 1800);
+          return;
+        }
+
+        function showCopied(ok) {
+          showStatus(ok ? "✓ Copiado" : "Selecione o texto e copie manualmente.", ok ? 1800 : 3200);
+        }
+
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+          navigator.clipboard.writeText(copyText)
+            .then(function () { showCopied(true); })
+            .catch(function () { showCopied(copyPrescriptionTextFallback(copyText)); });
+          return;
+        }
+
+        showCopied(copyPrescriptionTextFallback(copyText));
+      });
+    }
+
+    if (clearButton && clearButton.dataset.bound !== "true") {
+      clearButton.dataset.bound = "true";
+      clearButton.addEventListener("click", function () {
+        display.value = "";
+        showStatus("Texto limpo.", 1200);
+      });
+    }
+  }
+
   function render(snapshot, options) {
     updating = true;
 
@@ -2027,6 +2313,8 @@
         form[name].tabIndex = -1;
       }
     });
+
+    renderPrescriptionStageText(snapshot);
 
     renderAlertList(
       "alertaSolucao",
@@ -2181,25 +2469,7 @@
     alertElement.innerHTML = "";
   }
 
-  function applyEmptyInitialDisplay() {
-    updating = true;
-
-    EMPTY_ON_START_FIELDS.forEach(function (name) {
-      if (form[name]) form[name].value = "";
-    });
-
-    CLEAR_RESULT_FIELDS.forEach(function (name) {
-      if (form[name]) form[name].value = "";
-    });
-
-    if (form.concso) form.concso.value = "2";
-    if (form.concsodio) form.concsodio.value = "2";
-    if (form.etapas) form.etapas.value = "1";
-    if (form.etapas2) form.etapas2.value = "1";
-    if (form.cd) form.cd.value = "10";
-    if (form.cs1) form.cs1.value = "5";
-    if (form.cs2) form.cs2.value = "10";
-
+  function applyFieldMetadata() {
     Object.keys(FIELD_META).forEach(function (name) {
       if (!form[name]) return;
       form[name].dataset.role = FIELD_META[name].role;
@@ -2209,19 +2479,102 @@
         form[name].tabIndex = -1;
       }
     });
+  }
+
+  function clearTransientUi() {
+    var prescriptionTextDisplay = document.getElementById("prescricaoEtapaTexto");
+    if (prescriptionTextDisplay) prescriptionTextDisplay.value = "";
+    var prescriptionCopyStatus = document.getElementById("prescricaoEtapaCopyStatus");
+    if (prescriptionCopyStatus) prescriptionCopyStatus.textContent = "";
 
     hideAlertElement("alertaSolucao");
     hideAlertElement("alertaAjusteAutomaticoMistura");
     hideAlertElement("alertaMistura");
     hideErrorToast();
+  }
 
+  // Na abertura, os valores declarados no próprio HTML são os valores iniciais.
+  function initializeFromHtmlDefaults() {
+    updating = true;
+    applyFieldMetadata();
+    clearTransientUi();
+    updating = false;
+
+    initialRawState = createStateFromForm();
+    var candidate = deepClone(initialRawState);
+    computeDirect(candidate);
+    state = candidate;
+    render(state);
+  }
+
+  function createZeroState() {
+    return {
+      clinical: {
+        peso: 0,
+        etapas: 1,
+        volume: 0,
+        sodio: 0,
+        potassio: 0,
+        calcio: 0,
+        concso: 2
+      },
+      prescricao: {
+        volumetotal: 0,
+        sodiototal: 0,
+        potassiototal: 0,
+        calciototal: 0,
+        concsodio: 2
+      },
+      derivados: {
+        volt: 0,
+        tempohoras: 0,
+        mlhora: 0,
+        osmolaridade: 0,
+        volume1: 0,
+        volume2: 0
+      },
+      mistura: {
+        volume3: 0,
+        cd: 0,
+        cs1: 0,
+        cs2: 5,
+        vs1: 0,
+        vs2: 0,
+        tig: 0
+      }
+    };
+  }
+
+  function applyZeroedDisplay() {
+    updating = true;
+
+    Object.keys(FIELD_META).forEach(function (name) {
+      if (!form[name]) return;
+      var element = form[name];
+      element.dataset.role = FIELD_META[name].role;
+      element.title = getFieldRoleTitle(FIELD_META[name].role);
+      if (element.tagName !== "SELECT") element.value = "0";
+      if (name === "tempohoras" || name === "osmolaridade") {
+        element.readOnly = true;
+        element.tabIndex = -1;
+      }
+    });
+
+    // Seletores permanecem em opções válidas; todos os campos numéricos ficam em zero.
+    if (form.etapas) form.etapas.value = "1";
+    if (form.etapas2) form.etapas2.value = "1";
+    if (form.concso) form.concso.value = "2";
+    if (form.concsodio) form.concsodio.value = "2";
+    if (form.cs1) form.cs1.value = "0";
+    if (form.cs2) form.cs2.value = "5";
+
+    clearTransientUi();
     updating = false;
   }
 
-  function resetToEmptyInitialState() {
-    applyEmptyInitialDisplay();
-    initialRawState = createStateFromForm();
-    state = deepClone(initialRawState);
+  function resetToZeroState() {
+    state = createZeroState();
+    applyZeroedDisplay();
   }
 
   function fail(error, preserveForm) {
@@ -2376,7 +2729,7 @@
     });
 
     var mistura = document.getElementById("secaoMistura");
-    if (mistura) mistura.open = true;
+    if (mistura) mistura.open = false;
   }
 
   function scrollSectionToTop(sectionId) {
@@ -2388,6 +2741,10 @@
     }
 
     if (sectionId === "secaoMistura" && "open" in section) {
+      section.open = true;
+    }
+
+    if (sectionId === "secaoResumoHidratacao" && "open" in section) {
       section.open = true;
     }
 
@@ -2447,10 +2804,18 @@
         var soft = !!(options && options.soft);
         var intent = getIntentForField(name);
 
-        // Campos diretos de entrada clínica não recalculam no blur/change.
-        // A regra de campo vazio = 0 vale apenas quando o usuário clica em Calcular.
-        // Fora disso, a tela preserva campo vazio como vazio e campo preenchido como está.
+        // Campos diretos recalculam automaticamente quando o usuário confirma a alteração
+        // (ao sair do campo ou trocar um seletor). Campos opcionais vazios são tratados
+        // como zero, preservando-os visualmente vazios quando aplicável.
         if (intent === INTENT.DIRECT) {
+          try {
+            var preserveEmptyInputFields = getEmptyFieldMap(EMPTY_AS_ZERO_ON_CALCULATE_FIELDS);
+            var candidate = createStateFromForm();
+            computeDirect(candidate);
+            commit(candidate, { preserveEmptyInputFields: preserveEmptyInputFields });
+          } catch (error) {
+            fail(error, true);
+          }
           return;
         }
 
@@ -2516,9 +2881,8 @@
           })(maskSpec));
         }
 
-        // Campos digitáveis não recalculam durante a digitação.
-        // Campos diretos são recalculados apenas pelo botão Calcular; campos inversos/reversos
-        // continuam sendo confirmados ao sair do campo.
+        // Campos digitáveis não recalculam durante a digitação para não interromper a entrada.
+        // Ao sair do campo, o cálculo correspondente é confirmado automaticamente.
         el.addEventListener("blur", function () { triggerFieldUpdate({ soft: false }); });
       }
     });
@@ -2526,20 +2890,13 @@
     var topCalculateButton = document.getElementById("btnCalcular");
     if (topCalculateButton) {
       topCalculateButton.addEventListener("click", function () {
-        handleCalculateButtonClick("secaoPrescricao");
-      });
-    }
-
-    var footerCalculateButton = document.getElementById("btnCalcularRodape");
-    if (footerCalculateButton) {
-      footerCalculateButton.addEventListener("click", function () {
-        handleCalculateButtonClick("secaoMistura");
+        handleCalculateButtonClick("secaoResumoHidratacao");
       });
     }
 
     form.addEventListener("reset", function (event) {
       event.preventDefault();
-      resetToEmptyInitialState();
+      resetToZeroState();
       window.requestAnimationFrame(function () {
         window.scrollTo({
           top: 0,
@@ -3004,7 +3361,7 @@
   function bootstrap() {
     initializeCollapsibleSections();
 
-    resetToEmptyInitialState();
+    initializeFromHtmlDefaults();
 
     try {
       window.HidraCalculator.selfTest = runSelfTests();
@@ -3020,6 +3377,7 @@
     }
 
     bindFieldEvents();
+    bindPrescriptionStageCopy();
   }
 
   window.HidraCalculator = {
@@ -3046,6 +3404,7 @@
     computeByIntent: computeByIntent,
     updateFromUserField: updateFromUserField,
     recalculateFromCurrentState: recalculateFromCurrentState,
+    buildPrescriptionStageText: buildPrescriptionStageText,
     runSelfTests: runSelfTests
   };
 
