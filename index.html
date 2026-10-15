@@ -1,6 +1,8 @@
 <!-- NomeDoApp = "Hidratação Venosa Neonatal" -->
-<!-- AndroidVersionName = "1.11.10.9" -->
-<!-- AndroidVersionCode = "262820547"; Timestamp = "2026-10-09T05:47:00-03:00" -->
+<!-- VersionName = "1.11.10.11" -->
+<!-- VersionCode = "262840821" -->
+<!-- AndroidVersionName = "1.11.10.11" -->
+<!-- AndroidVersionCode = "262840821"; Timestamp = "2026-10-09T05:47:00-03:00" -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -172,6 +174,11 @@
       color: var(--amarelo);
       border-color: #fde047;
     }
+    .campo input.is-recalculated,
+    .campo input[readonly].is-recalculated,
+    .campo select.is-recalculated {
+      background-color: #bfdbfe;
+    }
     .campo .unidade {
       font-size: 0.7rem;
       color: #475569;
@@ -196,6 +203,14 @@
     }
     .campo-inline input {
       flex: 1;
+    }
+    .campo-inline-sodio {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 2px 6px;
+    }
+    .campo-inline-sodio .unidade {
+      grid-column: 2;
     }
 
     /* -------- BOTÕES -------- */
@@ -460,6 +475,11 @@
       border-color:var(--azul-med);
       box-shadow:0 0 0 4px rgba(37,99,168,.12);
     }
+    #secaoPrescricao,
+    #secaoResumoHidratacao,
+    #prescricaoEtapaTexto{
+      background:linear-gradient(180deg,#fffdfa 0%,#fff8dd 100%);
+    }
     .prontuario-actions{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
@@ -518,6 +538,12 @@
       .prontuario-actions{grid-template-columns:1fr 1fr}
     }
 
+    .field-error { color:#b91c1c; font-size:.72rem; line-height:1.25; margin-top:3px; }
+    .campo input[aria-invalid="true"], .campo select[aria-invalid="true"] { border-color:#dc2626; }
+    .field-role-note { color:#64748b; font-size:.66rem; line-height:1.2; margin-top:2px; }
+    .calculation-status { color:#475569; font-size:.78rem; line-height:1.3; margin-top:8px; }
+    .calculation-status.is-invalid { color:#b91c1c; }
+    .btn:disabled { opacity:.55; cursor:default; }
   </style>
 </head>
 <body>
@@ -545,38 +571,38 @@
     <div class="secao-body">
       <div class="grid-2">
         <div class="campo">
-          <label>Peso de Cálculo</label>
+          <label>Peso de cálculo</label>
           <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso" value="2,800">
           <span class="unidade">kg</span>
         </div>
         <div class="campo">
-          <label>Número de Etapas</label>
+          <label>Número de etapas/intervalo em horas</label>
           <select name="etapas">
-            <option value="1" selected>1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="6">6</option>
-            <option value="8">8</option>
-            <option value="12">12</option>
+            <option value="1" selected>1&nbsp;&nbsp;&nbsp;&nbsp;(24/24 horas)</option>
+            <option value="2">2&nbsp;&nbsp;&nbsp;&nbsp;(12/12 horas)</option>
+            <option value="3">3&nbsp;&nbsp;&nbsp;&nbsp;(08/08 horas)</option>
+            <option value="4">4&nbsp;&nbsp;&nbsp;&nbsp;(06/06 horas)</option>
+            <option value="6">6&nbsp;&nbsp;&nbsp;&nbsp;(04/04 horas)</option>
+            <option value="8">8&nbsp;&nbsp;&nbsp;&nbsp;(03/03 horas)</option>
+            <option value="12">12&nbsp;&nbsp;&nbsp;&nbsp;(02/02 horas)</option>
           </select>
           <span class="unidade">etapas/dia</span>
         </div>
         <div class="campo">
-          <label>Volume</label>
+          <label>Taxa hídrica</label>
           <input type="text" inputmode="decimal" name="volume" value="100">
           <span class="unidade">ml/kg/dia</span>
         </div>
         <div class="campo">
           <label>Sódio (NaCl)</label>
-          <div class="campo-inline">
+          <div class="campo-inline campo-inline-sodio">
             <select name="concso">
               <option value="1">10%</option>
               <option value="2" selected>20%</option>
             </select>
             <input type="text" inputmode="decimal" name="sodio" value="3">
+            <span class="unidade">mEq/kg/dia</span>
           </div>
-          <span class="unidade">mEq/kg/dia</span>
         </div>
         <div class="campo">
           <label>Potássio (KCl 10%)</label>
@@ -584,7 +610,7 @@
           <span class="unidade">mEq/kg/dia</span>
         </div>
         <div class="campo">
-          <label>Cálcio (Gluconato de Cálcio 10%)</label>
+          <label>Cálcio (gluconato de cálcio 10%)</label>
           <input type="text" inputmode="numeric" name="calcio" value="300">
           <span class="unidade">mg/kg/dia de gluconato de cálcio 10%</span>
         </div>
@@ -606,17 +632,17 @@
     <div class="secao-body">
       <div class="grid-2">
         <div class="campo">
-          <label>Volume base glicosado por Etapa</label>
+          <label>Volume base glicosado por etapa</label>
           <input type="text" name="volume3" value="0" inputmode="decimal">
           <span class="unidade">ml</span>
         </div>
         <div class="campo">
-          <label>Concentração Desejada</label>
+          <label>Concentração desejada</label>
           <input type="text" inputmode="decimal" name="cd" value="10">
           <span class="unidade">% glicose</span>
         </div>
         <div class="campo">
-          <label>Concentração do 1º Soro (menor)</label>
+          <label>Concentração do 1º soro (menor)</label>
           <select name="cs1">
             <option value="0">0% (Água destilada)</option>
             <option value="5" selected>5%</option>
@@ -627,12 +653,12 @@
           <span class="unidade">% glicose</span>
         </div>
         <div class="campo">
-          <label>Volume do 1º Soro</label>
+          <label>Volume do 1º soro</label>
           <input type="text" name="vs1" value="0" class="resultado-amarelo" inputmode="decimal">
           <span class="unidade">ml</span>
         </div>
         <div class="campo">
-          <label>Concentração do 2º Soro (maior)</label>
+          <label>Concentração do 2º soro (maior)</label>
           <select name="cs2">
             <option value="0">0% (Água destilada)</option>
             <option value="5">5%</option>
@@ -643,7 +669,7 @@
           <span class="unidade">% glicose</span>
         </div>
         <div class="campo">
-          <label>Volume do 2º Soro</label>
+          <label>Volume do 2º soro</label>
           <input type="text" name="vs2" value="0" class="resultado-amarelo" inputmode="decimal">
           <span class="unidade">ml</span>
         </div>
@@ -664,12 +690,12 @@
     <div class="secao-body">
       <div class="grid-2">
         <div class="campo">
-          <label>Volume base glicosado por Etapa</label>
+          <label>Volume base glicosado por etapa</label>
           <input type="text" name="volumetotal" value="0" inputmode="decimal">
           <span class="unidade">ml</span>
         </div>
         <div class="campo">
-          <label>NaCl por Etapa</label>
+          <label>NaCl por etapa</label>
           <div class="campo-inline">
             <select name="concsodio">
               <option value="1">10%</option>
@@ -680,12 +706,12 @@
           <span class="unidade">ml</span>
         </div>
         <div class="campo">
-          <label>KCl 10% por Etapa</label>
+          <label>KCl 10% por etapa</label>
           <input type="text" name="potassiototal" value="0" inputmode="decimal">
           <span class="unidade">ml</span>
         </div>
         <div class="campo">
-          <label>Gluconato de Cálcio 10% por Etapa</label>
+          <label>Gluconato de cálcio 10% por etapa</label>
           <input type="text" name="calciototal" value="0" inputmode="decimal">
           <span class="unidade">ml</span>
         </div>
@@ -695,12 +721,12 @@
 
       <div class="prescricao-resultados-compactos">
         <div class="campo">
-          <label>Volume Total da Etapa</label>
+          <label>Volume total da etapa</label>
           <input type="text" name="volt" value="0" class="resultado-verde" inputmode="decimal">
           <span class="unidade">ml</span>
         </div>
         <div class="campo">
-          <label>Infundir em</label>
+          <label>Velocidade de infusão</label>
           <input type="text" name="mlhora" value="0" class="resultado-verde" inputmode="decimal">
           <span class="unidade">ml/hora</span>
         </div>
@@ -708,7 +734,7 @@
 
       <div class="prescricao-resultados-compactos">
         <div class="campo">
-          <label>Tempo por Etapa</label>
+          <label>Tempo por etapa</label>
           <input type="text" name="tempohoras" value="0" class="resultado-verde" readonly>
           <span class="unidade">horas</span>
         </div>
@@ -721,12 +747,12 @@
 
       <div class="prescricao-resultados-compactos">
         <div class="campo">
-          <label>Taxa Hídrica Total</label>
+          <label>Taxa hídrica total</label>
           <input type="text" name="volume2" value="0" inputmode="decimal">
           <span class="unidade">ml/kg/dia</span>
         </div>
         <div class="campo">
-          <label>Peso de Cálculo</label>
+          <label>Peso de cálculo</label>
           <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso1" value="0">
           <span class="unidade">kg</span>
         </div>
@@ -734,15 +760,15 @@
 
       <div class="prescricao-resultados-compactos">
         <div class="campo">
-          <label>Número de Etapas</label>
+          <label>Número de etapas/intervalo em horas</label>
           <select name="etapas2">
-            <option value="1" selected>1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="6">6</option>
-            <option value="8">8</option>
-            <option value="12">12</option>
+            <option value="1" selected>1&nbsp;&nbsp;&nbsp;&nbsp;(24/24 horas)</option>
+            <option value="2">2&nbsp;&nbsp;&nbsp;&nbsp;(12/12 horas)</option>
+            <option value="3">3&nbsp;&nbsp;&nbsp;&nbsp;(08/08 horas)</option>
+            <option value="4">4&nbsp;&nbsp;&nbsp;&nbsp;(06/06 horas)</option>
+            <option value="6">6&nbsp;&nbsp;&nbsp;&nbsp;(04/04 horas)</option>
+            <option value="8">8&nbsp;&nbsp;&nbsp;&nbsp;(03/03 horas)</option>
+            <option value="12">12&nbsp;&nbsp;&nbsp;&nbsp;(02/02 horas)</option>
           </select>
           <span class="unidade">etapas/dia</span>
         </div>
@@ -763,6 +789,7 @@
     <div class="secao-body">
       <div class="prontuario-content">
         <textarea id="prescricaoEtapaTexto" rows="12" class="prontuario-textarea" placeholder="A prescrição da hidratação será montada automaticamente conforme os cálculos atuais."></textarea>
+        <p id="calculationStatus" class="calculation-status" role="status" aria-live="polite"></p>
         <div class="prontuario-actions">
           <button type="button" class="btn btn-primary" id="gerarResumoHidratacao">Gerar Prescrição</button>
           <button type="button" class="btn btn-secondary" id="copiarResumoHidratacao">Copiar Prescrição</button>
@@ -838,6 +865,15 @@
   var updating = false;
   var errorToastHideTimer = null;
   var initialRawState = null;
+  var UI_STATE = {
+    pendingFields: {},
+    fieldErrors: {},
+    editSessions: {},
+    revision: 0,
+    hasValidResult: false,
+    navigationTimer: null,
+    highlightTimers: {}
+  };
 
   // ==========================================================
   // field metadata
@@ -1022,7 +1058,7 @@
       return formatted.replace(".", ",");
     }
 
-    return formatted;
+    return formatted.replace(".", ",");
   }
 
   function deepClone(obj) {
@@ -2244,6 +2280,7 @@
     if (generateButton && generateButton.dataset.bound !== "true") {
       generateButton.dataset.bound = "true";
       generateButton.addEventListener("click", function () {
+        if (!refreshResultStatus()) return;
         display.value = buildPrescriptionStageText(state);
         showStatus("Prescrição atualizada.", 1500);
       });
@@ -2252,6 +2289,8 @@
     if (copyButton && copyButton.dataset.bound !== "true") {
       copyButton.dataset.bound = "true";
       copyButton.addEventListener("click", function () {
+        if (!refreshResultStatus()) return;
+        var copyRevision = UI_STATE.revision;
         if (!display.value.trim()) display.value = buildPrescriptionStageText(state);
         var copyText = display.value || "";
         if (!copyText.trim()) {
@@ -2260,13 +2299,18 @@
         }
 
         function showCopied(ok) {
+          if (UI_STATE.revision !== copyRevision || !refreshResultStatus()) return;
           showStatus(ok ? "✓ Copiado" : "Selecione o texto e copie manualmente.", ok ? 1800 : 3200);
         }
 
         if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
           navigator.clipboard.writeText(copyText)
             .then(function () { showCopied(true); })
-            .catch(function () { showCopied(copyPrescriptionTextFallback(copyText)); });
+            .catch(function () {
+              if (UI_STATE.revision === copyRevision && refreshResultStatus()) {
+                showCopied(copyPrescriptionTextFallback(copyText));
+              }
+            });
           return;
         }
 
@@ -2283,10 +2327,29 @@
     }
   }
 
+  function clearRecalculatedHighlights() {
+    Object.keys(UI_STATE.highlightTimers).forEach(function (name) {
+      window.clearTimeout(UI_STATE.highlightTimers[name]);
+      if (form[name]) form[name].classList.remove("is-recalculated");
+    });
+    UI_STATE.highlightTimers = {};
+  }
+
+  function highlightRecalculatedField(name) {
+    var element = form[name];
+    element.classList.add("is-recalculated");
+    UI_STATE.highlightTimers[name] = window.setTimeout(function () {
+      element.classList.remove("is-recalculated");
+      delete UI_STATE.highlightTimers[name];
+    }, 1000);
+  }
+
   function render(snapshot, options) {
     updating = true;
+    clearRecalculatedHighlights();
 
     var skipName = options && options.skipName;
+    var highlightSource = options && options.highlightSource;
 
     Object.keys(FIELD_META).forEach(function (name) {
       if (!form[name]) return;
@@ -2298,12 +2361,18 @@
       // sem recalcular, sem reler o DOM e sem alterar o snapshot.
       // Durante digitação contínua, preserva apenas o campo ativo para não
       // transformar "7" em "7.0" antes do usuário terminar de digitar.
-      if (name !== skipName) {
+      var preservePending = options && options.confirmedNames && UI_STATE.pendingFields[name] &&
+        options.confirmedNames.indexOf(name) < 0;
+      var previousValue = form[name].value;
+      if (name !== skipName && !preservePending) {
         if (options && options.preserveEmptyInputFields && options.preserveEmptyInputFields[name]) {
           form[name].value = "";
         } else {
           form[name].value = displayValue;
         }
+      }
+      if (highlightSource && name !== highlightSource && !UI_STATE.pendingFields[name] && form[name].value !== previousValue) {
+        highlightRecalculatedField(name);
       }
       form[name].dataset.role = FIELD_META[name].role;
       form[name].title = getFieldRoleTitle(FIELD_META[name].role);
@@ -2314,6 +2383,7 @@
       }
     });
 
+    updateStageDurations();
     renderPrescriptionStageText(snapshot);
 
     renderAlertList(
@@ -2341,6 +2411,7 @@
     var stageAutoAdjustment = candidate._meta && candidate._meta.stageAutoAdjustment;
     state = candidate;
     render(state, renderOptions);
+    markResultsCurrent(renderOptions && renderOptions.confirmedNames);
     showWeightAutoAdjustmentToast(weightAutoAdjustment);
     showStageAutoAdjustmentToast(stageAutoAdjustment);
     if (state && state._meta) {
@@ -2469,11 +2540,240 @@
     alertElement.innerHTML = "";
   }
 
+  function getEditableControls() {
+    return Array.prototype.slice.call(form.querySelectorAll("input[name],select[name]"))
+      .filter(function (element) { return FIELD_META[element.name] && FIELD_META[element.name].role !== "exibicao"; });
+  }
+
+  function describeField(element, id) {
+    var ids = (element.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+    if (ids.indexOf(id) < 0) ids.push(id);
+    element.setAttribute("aria-describedby", ids.join(" "));
+  }
+
+  function initializeFieldUi(name) {
+    var element = form[name];
+    var container = element.closest(".campo");
+    if (!container) return;
+    if (!element.id) element.id = "field-" + name;
+    element.setAttribute("aria-invalid", "false");
+    if (FIELD_META[name].role !== "exibicao") {
+      var error = document.getElementById("fieldError-" + name);
+      if (!error) {
+        error = document.createElement("div");
+        error.id = "fieldError-" + name;
+        error.className = "field-error";
+        error.hidden = true;
+        container.appendChild(error);
+      }
+      describeField(element, error.id);
+    }
+    if (FIELD_META[name].role === "exibicao") {
+      var note = container.querySelector(".field-role-note");
+      if (!note) {
+        note = document.createElement("span");
+        note.id = "fieldRole-" + name;
+        note.className = "field-role-note";
+        note.textContent = "Calculado automaticamente.";
+        container.appendChild(note);
+      }
+      describeField(element, note.id);
+    }
+  }
+
+  function updateStageDurations() {
+    ["etapas", "etapas2"].forEach(function (name) {
+      var element = form[name];
+      if (!element) return;
+      var unit = element.closest(".campo").querySelector(".unidade");
+      var count = Number(element.value);
+      if (unit && isAllowedStageCount(count)) {
+        unit.id = "stageDuration-" + name;
+        unit.textContent = "etapas/dia · " + (24 / count) + " h por etapa";
+        describeField(element, unit.id);
+      }
+    });
+  }
+
+  function clearFieldError(name) {
+    delete UI_STATE.fieldErrors[name];
+    if (form[name]) form[name].setAttribute("aria-invalid", "false");
+    var error = document.getElementById("fieldError-" + name);
+    if (error) { error.textContent = ""; error.hidden = true; }
+  }
+
+  function refreshResultStatus() {
+    var invalid = Object.keys(UI_STATE.fieldErrors).length > 0;
+    var pending = Object.keys(UI_STATE.pendingFields).length > 0;
+    var usable = UI_STATE.hasValidResult && !invalid && !pending;
+    var status = document.getElementById("calculationStatus");
+    if (status) {
+      status.textContent = invalid
+        ? "Revise o campo indicado. A prescrição anterior não corresponde aos dados em edição."
+        : pending ? "Dados alterados. Confirme o campo ou use Calcular para atualizar os resultados."
+          : usable ? "Cálculo atualizado." : "Aguardando cálculo válido.";
+      status.classList.toggle("is-invalid", invalid);
+    }
+    ["gerarResumoHidratacao", "copiarResumoHidratacao"].forEach(function (id) {
+      var button = document.getElementById(id);
+      if (button) button.disabled = !usable;
+    });
+    return usable;
+  }
+
+  function markResultsCurrent(confirmedNames) {
+    var names = confirmedNames || Object.keys(FIELD_META);
+    names.forEach(function (name) {
+      delete UI_STATE.pendingFields[name];
+      clearFieldError(name);
+      if (UI_STATE.editSessions[name]) UI_STATE.editSessions[name].dirty = false;
+    });
+    UI_STATE.hasValidResult = true;
+    refreshResultStatus();
+  }
+
+  function cancelFieldNavigation() {
+    if (UI_STATE.navigationTimer !== null) {
+      window.clearTimeout(UI_STATE.navigationTimer);
+      UI_STATE.navigationTimer = null;
+    }
+  }
+
+  function focusControl(element) {
+    if (!element) return;
+    cancelFieldNavigation();
+    UI_STATE.navigationTimer = window.setTimeout(function () {
+      UI_STATE.navigationTimer = null;
+      var details = element.closest("details");
+      if (details) details.open = true;
+      var section = element.closest(".secao-js-collapsible");
+      if (section) setSectionOpen(section.id, true);
+      element.focus({ preventScroll: true });
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 0);
+  }
+
+  function markFieldPending(name) {
+    cancelFieldNavigation();
+    clearRecalculatedHighlights();
+    UI_STATE.pendingFields[name] = ++UI_STATE.revision;
+    Object.keys(UI_STATE.fieldErrors).forEach(function (errorName) {
+      if (FIELD_META[errorName].path === FIELD_META[name].path) clearFieldError(errorName);
+    });
+    refreshResultStatus();
+  }
+
+  function rawFieldError(name) {
+    var text = String(form[name].value || "").trim();
+    if (text === "") return name === "peso" || name === "peso1" ? "Informe o Peso de Cálculo antes de calcular." : "";
+    if (/[,.]$/.test(text)) return "Complete o número após o separador decimal.";
+    return Number.isFinite(parseDecimal(text)) ? "" : "Informe um número válido neste campo.";
+  }
+
+  function failFieldUpdate(error, preferredName, moveFocus) {
+    var message = error && error.message ? error.message : String(error);
+    var name = error && error.fieldName;
+    if (!name && /peso/i.test(message)) name = preferredName === "peso1" ? "peso1" : "peso";
+    if (!name && /etapas|horas por etapa/i.test(message)) name = preferredName === "etapas2" ? "etapas2" : "etapas";
+    if (!name && /1º soro|soros glicosados permitidos/i.test(message)) name = preferredName === "cs2" ? "cs2" : "cs1";
+    if (!name) name = preferredName || "peso";
+    UI_STATE.fieldErrors[name] = message;
+    form[name].setAttribute("aria-invalid", "true");
+    var display = document.getElementById("fieldError-" + name);
+    if (display) { display.textContent = message; display.hidden = false; }
+    refreshResultStatus();
+    fail(error, true);
+    if (moveFocus) focusControl(form[name]);
+  }
+
+  function confirmUiFields(preferredName, options) {
+    var force = options && options.force;
+    var names = Object.keys(UI_STATE.pendingFields).sort(function (a, b) { return UI_STATE.pendingFields[a] - UI_STATE.pendingFields[b]; });
+    if (!force && names.length === 0 && refreshResultStatus()) return true;
+    var sourceName = preferredName && UI_STATE.pendingFields[preferredName]
+      ? preferredName : names[names.length - 1] || preferredName || "calcio";
+    try {
+      var intent = getIntentForField(sourceName);
+      var directPendingPaths = names.filter(function (name) {
+        return FIELD_META[name].role === "input-direto";
+      }).map(function (name) { return FIELD_META[name].path; });
+      var confirmedNames = Object.keys(FIELD_META).filter(function (name) {
+        return intent === INTENT.DIRECT
+          ? FIELD_META[name].role === "input-direto" || directPendingPaths.indexOf(FIELD_META[name].path) >= 0
+          : FIELD_META[name].path === FIELD_META[sourceName].path;
+      });
+      var inputNames = intent === INTENT.DIRECT
+        ? confirmedNames.filter(function (name) { return FIELD_META[name].role === "input-direto"; })
+        : [sourceName];
+      inputNames.forEach(function (name) {
+        var message = rawFieldError(name);
+        if (message) {
+          var inputError = new Error(message);
+          inputError.fieldName = name;
+          throw inputError;
+        }
+      });
+      if (intent === INTENT.DIRECT) {
+        assertWeightBeforeCalculate();
+      }
+      var candidate = intent === INTENT.DIRECT ? createStateFromForm() : deepClone(state);
+      if (intent !== INTENT.DIRECT) {
+        setByPath(candidate, FIELD_META[sourceName].path, parseFieldValueForCalculation(sourceName, form[sourceName].value, 0));
+        sanitizeFieldInState(sourceName, candidate);
+      } else {
+        var rawPeso = parseFieldValueForCalculation("peso", form.peso.value, 0);
+        if (Number.isFinite(rawPeso) && rawPeso > MAX_WEIGHT_KG && Math.abs(candidate.clinical.peso - rawPeso) > EPS) {
+          ensureMeta(candidate).weightAutoAdjustment = { from: rawPeso, to: candidate.clinical.peso };
+        }
+      }
+      var preserveEmptyInputFields = intent === INTENT.DIRECT ? getEmptyFieldMap(EMPTY_AS_ZERO_ON_CALCULATE_FIELDS) : null;
+      computeByIntent(candidate, intent);
+      commit(candidate, {
+        preserveEmptyInputFields: preserveEmptyInputFields,
+        confirmedNames: confirmedNames,
+        highlightSource: sourceName
+      });
+      var usable = refreshResultStatus();
+      if (!usable && options && options.moveFocus) {
+        var remaining = Object.keys(UI_STATE.fieldErrors)[0] || Object.keys(UI_STATE.pendingFields)[0];
+        if (remaining) focusControl(form[remaining]);
+      }
+      return usable;
+    } catch (error) {
+      failFieldUpdate(error, sourceName, options && options.moveFocus);
+      return false;
+    }
+  }
+
+  function isControlVisible(element) {
+    var section = element.closest(".secao-js-collapsible");
+    var details = element.closest("details");
+    return !(section && section.classList.contains("is-collapsed")) && !(details && !details.open);
+  }
+
+  function advanceField(name) {
+    if (Object.keys(UI_STATE.pendingFields).length > 0 && !confirmUiFields(name, { moveFocus: true })) return;
+    if (name === "calcio") {
+      scrollSectionToTop("secaoResumoHidratacao");
+      focusControl(document.getElementById("copiarResumoHidratacao"));
+      return;
+    }
+    var controls = getEditableControls().filter(isControlVisible);
+    var index = controls.indexOf(form[name]);
+    var nextInput = controls.slice(index + 1).filter(function (element) { return element.tagName === "INPUT"; })[0];
+    if (index >= 0 && nextInput) focusControl(nextInput);
+    else {
+      scrollSectionToTop("secaoResumoHidratacao");
+      focusControl(document.getElementById("copiarResumoHidratacao"));
+    }
+  }
+
   function applyFieldMetadata() {
     Object.keys(FIELD_META).forEach(function (name) {
       if (!form[name]) return;
       form[name].dataset.role = FIELD_META[name].role;
       form[name].title = getFieldRoleTitle(FIELD_META[name].role);
+      initializeFieldUi(name);
       if (name === "tempohoras" || name === "osmolaridade") {
         form[name].readOnly = true;
         form[name].tabIndex = -1;
@@ -2505,6 +2805,7 @@
     computeDirect(candidate);
     state = candidate;
     render(state);
+    markResultsCurrent();
   }
 
   function createZeroState() {
@@ -2553,28 +2854,38 @@
       var element = form[name];
       element.dataset.role = FIELD_META[name].role;
       element.title = getFieldRoleTitle(FIELD_META[name].role);
-      if (element.tagName !== "SELECT") element.value = "0";
+      element.value = "";
       if (name === "tempohoras" || name === "osmolaridade") {
         element.readOnly = true;
         element.tabIndex = -1;
       }
     });
 
-    // Seletores permanecem em opções válidas; todos os campos numéricos ficam em zero.
+    // Na limpeza, apenas etapas e concentração de NaCl mantêm os valores padrão.
     if (form.etapas) form.etapas.value = "1";
     if (form.etapas2) form.etapas2.value = "1";
     if (form.concso) form.concso.value = "2";
     if (form.concsodio) form.concsodio.value = "2";
-    if (form.cs1) form.cs1.value = "0";
-    if (form.cs2) form.cs2.value = "5";
 
     clearTransientUi();
     updating = false;
   }
 
   function resetToZeroState() {
+    cancelFieldNavigation();
+    clearRecalculatedHighlights();
+    UI_STATE.pendingFields = {};
+    Object.keys(UI_STATE.fieldErrors).forEach(clearFieldError);
+    UI_STATE.revision += 1;
+    UI_STATE.hasValidResult = false;
     state = createZeroState();
     applyZeroedDisplay();
+    Object.keys(UI_STATE.editSessions).forEach(function (name) {
+      UI_STATE.editSessions[name].dirty = false;
+      UI_STATE.editSessions[name].replaceOnFirstEdit = form[name].value !== "";
+    });
+    updateStageDurations();
+    refreshResultStatus();
   }
 
   function fail(error, preserveForm) {
@@ -2771,137 +3082,93 @@
 
   function handleCalculateButtonClick(targetSectionId) {
     if (updating) return;
-
-    try {
-      assertWeightBeforeCalculate();
-      var preserveEmptyInputFields = getEmptyFieldMap(EMPTY_AS_ZERO_ON_CALCULATE_FIELDS);
-      var rawPeso = parseFieldValueForCalculation("peso", form.peso && form.peso.value, 0);
-      var candidate = createStateFromForm();
-      if (Number.isFinite(rawPeso) && rawPeso > MAX_WEIGHT_KG && candidate && candidate.clinical && Math.abs(candidate.clinical.peso - rawPeso) > EPS) {
-        if (!candidate._meta) candidate._meta = {};
-        candidate._meta.weightAutoAdjustment = {
-          from: rawPeso,
-          to: candidate.clinical.peso
-        };
-      }
-      computeDirect(candidate);
-      commit(candidate, { preserveEmptyInputFields: preserveEmptyInputFields });
-      if (targetSectionId) {
-        scrollSectionToTop(targetSectionId);
-      }
-    } catch (error) {
-      fail(error, true);
+    if (confirmUiFields(null, { force: true, moveFocus: true }) && targetSectionId) {
+      scrollSectionToTop(targetSectionId);
     }
   }
 
   function bindFieldEvents() {
-    Object.keys(FIELD_META).forEach(function (name) {
-      var el = form[name];
-      if (!el || name === "tempohoras" || name === "osmolaridade") return;
-
-      var triggerFieldUpdate = function (options) {
-        if (updating) return;
-        var soft = !!(options && options.soft);
-        var intent = getIntentForField(name);
-
-        // Campos diretos recalculam automaticamente quando o usuário confirma a alteração
-        // (ao sair do campo ou trocar um seletor). Campos opcionais vazios são tratados
-        // como zero, preservando-os visualmente vazios quando aplicável.
-        if (intent === INTENT.DIRECT) {
-          try {
-            var preserveEmptyInputFields = getEmptyFieldMap(EMPTY_AS_ZERO_ON_CALCULATE_FIELDS);
-            var candidate = createStateFromForm();
-            computeDirect(candidate);
-            commit(candidate, { preserveEmptyInputFields: preserveEmptyInputFields });
-          } catch (error) {
-            fail(error, true);
-          }
-          return;
-        }
-
-        var parsed = parseFieldValueForCalculation(name, el.value, 0);
-
-        if (!Number.isFinite(parsed)) {
-          if (!soft) render(state);
-          return;
-        }
-
-        try {
-          updateFromUserField(name, el.value, soft ? { skipName: name } : null);
-        } catch (error) {
-          fail(error, true);
-        }
-      };
+    getEditableControls().forEach(function (el) {
+      var name = el.name;
+      var session = { replaceOnFirstEdit: false, dirty: false };
+      UI_STATE.editSessions[name] = session;
 
       if (el.tagName === "SELECT") {
-        // Selects confirmam a intenção no próprio change.
-        el.addEventListener("change", function () { triggerFieldUpdate({ soft: false }); });
+        el.tabIndex = -1;
+        el.addEventListener("change", function () {
+          if (updating) return;
+          markFieldPending(name);
+          confirmUiFields(name);
+        });
       } else {
-        // Máscara ativa para Peso de Cálculo.
-        // O cálculo continua sendo confirmado apenas ao sair do campo.
-        if (name === "peso" || name === "peso1") {
-          el.dataset.weightLastValid = el.value;
-          el.addEventListener("focus", function () {
-            el.dataset.weightLastValid = el.value;
-          });
-          el.addEventListener("input", function () {
-            var rawValue = el.value;
-            // Acima de 20 kg: interrompe a digitação (reverte ao último valor
-            // válido) em vez de saltar automaticamente para 20,000.
-            if (isWeightInputAboveMax(rawValue)) {
+        el.setAttribute("enterkeyhint", name === "calcio" ? "done" : "next");
+        el.addEventListener("focus", function () {
+          cancelFieldNavigation();
+          session.replaceOnFirstEdit = el.value !== "";
+          if (session.replaceOnFirstEdit) el.select();
+          if (name === "peso" || name === "peso1") el.dataset.weightLastValid = el.value;
+        });
+        el.addEventListener("beforeinput", function (event) {
+          if (session.replaceOnFirstEdit && /^(insert|delete)/.test(event.inputType || "")) el.select();
+        });
+        el.addEventListener("input", function (event) {
+          if (updating) return;
+          if (session.replaceOnFirstEdit) {
+            if (/^insert/.test(event.inputType || "") && typeof event.data === "string") el.value = event.data;
+            else if (/^delete/.test(event.inputType || "")) el.value = "";
+            session.replaceOnFirstEdit = false;
+          }
+          session.dirty = true;
+          markFieldPending(name);
+          var masked;
+          if (name === "peso" || name === "peso1") {
+            if (isWeightInputAboveMax(el.value)) {
               el.value = el.dataset.weightLastValid != null ? el.dataset.weightLastValid : "";
-              try {
-                el.setSelectionRange(el.value.length, el.value.length);
-              } catch (ignore) {}
+              try { el.setSelectionRange(el.value.length, el.value.length); } catch (ignore) {}
+              failFieldUpdate(new Error("Peso > 20 kg não suportado por esta ferramenta."), name, false);
               return;
             }
-            var masked = maskWeightInputValue(rawValue);
-            if (el.value !== masked) {
-              el.value = masked;
-              try {
-                el.setSelectionRange(el.value.length, el.value.length);
-              } catch (ignore) {}
-            }
+            masked = maskWeightInputValue(el.value);
             el.dataset.weightLastValid = masked;
-          });
-        } else if (DECIMAL_MASK_FIELDS[name]) {
-          // Máscaras decimais configuradas em DECIMAL_MASK_FIELDS.
-          // A digitação aceita números e separador decimal inicial/opcional (. ou ,).
-          var maskSpec = DECIMAL_MASK_FIELDS[name];
-          el.addEventListener("input", (function (spec) {
-            return function () {
-              var masked = maskDecimalInputValue(el.value, spec.intDigits, spec.decDigits);
-              if (el.value !== masked) {
-                el.value = masked;
-                try {
-                  el.setSelectionRange(el.value.length, el.value.length);
-                } catch (ignore) {}
-              }
-            };
-          })(maskSpec));
-        }
-
-        // Campos digitáveis não recalculam durante a digitação para não interromper a entrada.
-        // Ao sair do campo, o cálculo correspondente é confirmado automaticamente.
-        el.addEventListener("blur", function () { triggerFieldUpdate({ soft: false }); });
+          } else if (DECIMAL_MASK_FIELDS[name]) {
+            var spec = DECIMAL_MASK_FIELDS[name];
+            masked = maskDecimalInputValue(el.value, spec.intDigits, spec.decDigits);
+          } else {
+            masked = el.value;
+          }
+          if (el.value !== masked) {
+            el.value = masked;
+            try { el.setSelectionRange(el.value.length, el.value.length); } catch (ignore) {}
+          }
+        });
+        el.addEventListener("blur", function () {
+          session.replaceOnFirstEdit = false;
+          if (session.dirty && UI_STATE.pendingFields[name]) confirmUiFields(name);
+        });
       }
+
+      el.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && !event.isComposing) {
+          event.preventDefault();
+          advanceField(name);
+        }
+      });
     });
 
     var topCalculateButton = document.getElementById("btnCalcular");
-    if (topCalculateButton) {
-      topCalculateButton.addEventListener("click", function () {
-        handleCalculateButtonClick("secaoResumoHidratacao");
-      });
-    }
+    if (topCalculateButton) topCalculateButton.addEventListener("click", function () {
+      handleCalculateButtonClick("secaoResumoHidratacao");
+    });
 
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      handleCalculateButtonClick("secaoResumoHidratacao");
+    });
     form.addEventListener("reset", function (event) {
       event.preventDefault();
       resetToZeroState();
       window.requestAnimationFrame(function () {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       });
     });
   }
@@ -3019,18 +3286,18 @@
         computeDirect(invalid);
       }, "Peso > 20 kg");
       snapshot.clinical.peso = 3;
-      if (formatField("volumetotal", snapshot.prescricao.volumetotal, snapshot).split(".")[1].length !== 1) throw new Error("Volume base glicosado por etapa deve exibir 1 casa decimal em peso >= 1,5 kg.");
-      if (formatField("volume3", snapshot.mistura.volume3, snapshot).split(".")[1].length !== 1) throw new Error("Volume base da mistura deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (formatField("volumetotal", snapshot.prescricao.volumetotal, snapshot).split(",")[1].length !== 1) throw new Error("Volume base glicosado por etapa deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (formatField("volume3", snapshot.mistura.volume3, snapshot).split(",")[1].length !== 1) throw new Error("Volume base da mistura deve exibir 1 casa decimal em peso >= 1,5 kg.");
       if (Math.abs(snapshot.mistura.volume3 - snapshot.prescricao.volumetotal) > 1e-6) throw new Error("Volume base da mistura deve ser igual ao volume bruto da prescrição.");
-      if (formatField("sodiototal", snapshot.prescricao.sodiototal, snapshot).split(".")[1].length !== 1) throw new Error("Sódio deve exibir 1 casa decimal em peso >= 1,5 kg.");
-      if (formatField("potassiototal", snapshot.prescricao.potassiototal, snapshot).split(".")[1].length !== 1) throw new Error("Potássio deve exibir 1 casa decimal em peso >= 1,5 kg.");
-      if (formatField("calciototal", snapshot.prescricao.calciototal, snapshot).split(".")[1].length !== 1) throw new Error("Cálcio deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (formatField("sodiototal", snapshot.prescricao.sodiototal, snapshot).split(",")[1].length !== 1) throw new Error("Sódio deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (formatField("potassiototal", snapshot.prescricao.potassiototal, snapshot).split(",")[1].length !== 1) throw new Error("Potássio deve exibir 1 casa decimal em peso >= 1,5 kg.");
+      if (formatField("calciototal", snapshot.prescricao.calciototal, snapshot).split(",")[1].length !== 1) throw new Error("Cálcio deve exibir 1 casa decimal em peso >= 1,5 kg.");
       if (Math.abs(snapshot.derivados.volt - (snapshot.prescricao.volumetotal + snapshot.prescricao.sodiototal + snapshot.prescricao.potassiototal + snapshot.prescricao.calciototal)) > 1e-6) throw new Error("Volume Total da Etapa deve ser a soma dos valores brutos.");
       if (Math.abs(snapshot.derivados.mlhora - (snapshot.derivados.volt / snapshot.derivados.tempohoras)) > 1e-6) throw new Error("mL/hora deve ser calculado a partir do Volume Total da Etapa bruto.");
-      if (formatField("volt", snapshot.derivados.volt, snapshot).split(".")[1].length !== 2) throw new Error("Volume Total da Etapa deve manter 2 casas decimais.");
-      if (formatField("mlhora", snapshot.derivados.mlhora, snapshot).split(".")[1].length !== 1) throw new Error("mL/h deve exibir 1 casa decimal.");
-      if (formatField("osmolaridade", snapshot.derivados.osmolaridade, snapshot).split(".")[1].length !== 1) throw new Error("Osmolaridade deve exibir 1 casa decimal.");
-      if (formatField("tig", snapshot.mistura.tig, snapshot).split(".")[1].length !== 1) throw new Error("TIG deve exibir 1 casa decimal.");
+      if (formatField("volt", snapshot.derivados.volt, snapshot).split(",")[1].length !== 2) throw new Error("Volume Total da Etapa deve manter 2 casas decimais.");
+      if (formatField("mlhora", snapshot.derivados.mlhora, snapshot).split(",")[1].length !== 1) throw new Error("mL/h deve exibir 1 casa decimal.");
+      if (formatField("osmolaridade", snapshot.derivados.osmolaridade, snapshot).split(",")[1].length !== 1) throw new Error("Osmolaridade deve exibir 1 casa decimal.");
+      if (formatField("tig", snapshot.mistura.tig, snapshot).split(",")[1].length !== 1) throw new Error("TIG deve exibir 1 casa decimal.");
       if (formatAlertNumber(40, 0) !== "40,0") throw new Error("Alertas devem exibir 1 casa decimal.");
     });
 
@@ -3044,12 +3311,12 @@
       computeDirect(snapshot);
 
       if (!isPrecisionMode(snapshot)) throw new Error("Modo precisão deveria estar ativo para peso < 1,5 kg.");
-      if (formatField("volumetotal", snapshot.prescricao.volumetotal, snapshot).split(".")[1].length !== 1) throw new Error("Volume base deve exibir 1 casa decimal no modo precisão.");
-      if (formatField("volume3", snapshot.mistura.volume3, snapshot).split(".")[1].length !== 1) throw new Error("Volume base da mistura deve exibir 1 casa decimal no modo precisão.");
+      if (formatField("volumetotal", snapshot.prescricao.volumetotal, snapshot).split(",")[1].length !== 1) throw new Error("Volume base deve exibir 1 casa decimal no modo precisão.");
+      if (formatField("volume3", snapshot.mistura.volume3, snapshot).split(",")[1].length !== 1) throw new Error("Volume base da mistura deve exibir 1 casa decimal no modo precisão.");
       if (Math.abs(snapshot.mistura.volume3 - snapshot.prescricao.volumetotal) > 1e-6) throw new Error("Volume base da mistura deve ser igual ao volume bruto da prescrição no modo precisão.");
-      if (formatField("sodiototal", snapshot.prescricao.sodiototal, snapshot).split(".")[1].length !== 2) throw new Error("Sódio deve exibir 2 casas decimais no modo precisão.");
-      if (formatField("potassiototal", snapshot.prescricao.potassiototal, snapshot).split(".")[1].length !== 2) throw new Error("Potássio deve exibir 2 casas decimais no modo precisão.");
-      if (formatField("calciototal", snapshot.prescricao.calciototal, snapshot).split(".")[1].length !== 2) throw new Error("Cálcio deve exibir 2 casas decimais no modo precisão.");
+      if (formatField("sodiototal", snapshot.prescricao.sodiototal, snapshot).split(",")[1].length !== 2) throw new Error("Sódio deve exibir 2 casas decimais no modo precisão.");
+      if (formatField("potassiototal", snapshot.prescricao.potassiototal, snapshot).split(",")[1].length !== 2) throw new Error("Potássio deve exibir 2 casas decimais no modo precisão.");
+      if (formatField("calciototal", snapshot.prescricao.calciototal, snapshot).split(",")[1].length !== 2) throw new Error("Cálcio deve exibir 2 casas decimais no modo precisão.");
       if (Math.abs(snapshot.derivados.volt - (snapshot.prescricao.volumetotal + snapshot.prescricao.sodiototal + snapshot.prescricao.potassiototal + snapshot.prescricao.calciototal)) > 1e-6) throw new Error("Volume Total deve somar os valores brutos no modo precisão.");
       if (Math.abs(snapshot.derivados.mlhora - (snapshot.derivados.volt / snapshot.derivados.tempohoras)) > 1e-6) throw new Error("mL/h deve derivar do Volume Total bruto no modo precisão.");
       if (!getElectrolyteOsmolarityAlertMessages(snapshot).some(function (message) { return message.indexOf("Modo precisão ativado") === 0; })) {
@@ -3076,7 +3343,7 @@
       computeDirect(snapshot);
       computeInverse(snapshot);
       computeDirect(snapshot);
-      if (formatField("volume", snapshot.clinical.volume, snapshot) !== "70.00") {
+      if (formatField("volume", snapshot.clinical.volume, snapshot) !== "70,00") {
         throw new Error("Volume clínico não deve derivar para 70,1 após ciclos direto/inverso.");
       }
     });
@@ -3378,6 +3645,7 @@
 
     bindFieldEvents();
     bindPrescriptionStageCopy();
+    if (form.peso) form.peso.focus({ preventScroll: true });
   }
 
   window.HidraCalculator = {
