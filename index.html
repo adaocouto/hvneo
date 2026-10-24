@@ -1,8 +1,8 @@
 <!-- NomeDoApp = "Hidratação Venosa Neonatal" -->
-<!-- VersionName = "1.012.10.16" -->
-<!-- VersionCode = "262890941" -->
-<!-- AndroidVersionName = "1.012.10.16" -->
-<!-- AndroidVersionCode = "262890941"; Timestamp = "2026-10-16T09:41:48-03:00" -->
+<!-- VersionName = "1.012.10.22" -->
+<!-- VersionCode = "262951049" -->
+<!-- AndroidVersionName = "1.012.10.22" -->
+<!-- AndroidVersionCode = "262951049"; Timestamp = "2026-10-22T10:49:55-03:00" -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -810,10 +810,113 @@
         Este software e todas as informações nele contidas são fornecidos exclusivamente com propósitos educacionais e de auxílio à referência médica. ESTE SISTEMA NÃO SUBSTITUI O JULGAMENTO CLÍNICO INDIVIDUAL, A ANAMNESE E O EXAME FÍSICO. As informações aqui apresentadas não devem ser utilizadas isoladamente para o diagnóstico, conduta ou tratamento de pacientes. A responsabilidade final por qualquer decisão clínica, prescrição ou intervenção é exclusiva do profissional de saúde assistente, devidamente habilitado. Os desenvolvedores não garantem a precisão absoluta de todos os dados e isentam-se de responsabilidade por quaisquer danos diretos, indiretos, materiais ou morais que resultem do uso inadequado, interpretação equivocada ou confiança exclusiva nas informações deste sistema. Pacientes e indivíduos leigos que utilizarem este software devem sempre buscar a orientação de um médico qualificado antes de tomar qualquer decisão sobre sua saúde.
       </div>
 </details>
-<div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong><br><span class="version-name">1.012.10.16</span></div>
+<div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong><br><span class="version-name">1.012.10.22</span></div>
 
 <div class="spacer-3lines" aria-hidden="true"></div>
 
+
+<script id="hvneo-state-persistence">
+/* Android WebView state adapter: no changes to clinical calculation logic. */
+(function () {
+  'use strict';
+  var KEY = 'hvneo:input-snapshot:v1';
+  var APP_STATE_SCHEMA_VERSION = 1;
+  var SCHEMA = APP_STATE_SCHEMA_VERSION;
+  var form = document.getElementById('formHidra');
+  if (!form) return;
+  var timeoutId = null;
+  var restored = null;
+  function fields() {
+    return Array.prototype.filter.call(form.elements, function (el) {
+      return !!el.name && !el.readOnly && !el.disabled &&
+        (el.tagName === 'SELECT' || el.tagName === 'INPUT' && el.type !== 'file');
+    });
+  }
+  function readSnapshot() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw || raw.length > 16000) return null;
+      var item = JSON.parse(raw);
+      if (!item || item.schema !== SCHEMA || !item.values || typeof item.values !== 'object') return null;
+      // Never let an invalid or partially typed clinical value break the original bootstrap.
+      var required = ['peso', 'etapas', 'volume', 'sodio', 'potassio', 'calcio', 'concso'];
+      for (var i = 0; i < required.length; i += 1) {
+        var name = required[i], value = item.values[name];
+        if (typeof value !== 'string' || !/^[0-9., ]{1,32}$/.test(value)) return null;
+        var numeric = Number(value.trim().replace(',', '.'));
+        if (!Number.isFinite(numeric) || numeric < 0) return null;
+        if (name === 'peso' && (numeric < 0.3 || numeric > 20)) return null;
+        if (name === 'etapas' && [1,2,3,4,6,8,12].indexOf(numeric) === -1) return null;
+        if (name === 'concso' && [1,2].indexOf(numeric) === -1) return null;
+        if (numeric > 10000) return null;
+      }
+      return item;
+    } catch (_) { return null; }
+  }
+  function save() {
+    if (timeoutId !== null) { clearTimeout(timeoutId); timeoutId = null; }
+    var values = Object.create(null);
+    fields().forEach(function (el) { values[el.name] = el.value; });
+    var details = Object.create(null);
+    ['secaoMistura', 'secaoResumoHidratacao'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) details[id] = Boolean(el.open);
+    });
+    var collapsed = Object.create(null);
+    ['secaoParametros', 'secaoPrescricao'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) collapsed[id] = el.classList.contains('is-collapsed');
+    });
+    try { localStorage.setItem(KEY, JSON.stringify({schema:SCHEMA, values:values, details:details, collapsed:collapsed, scrollY:Math.max(0,Math.round(window.scrollY||0))})); }
+    catch (_) { /* browsers with blocked storage still calculate normally */ }
+  }
+  function scheduleSave() {
+    if (timeoutId !== null) clearTimeout(timeoutId);
+    timeoutId = setTimeout(save, 220);
+  }
+  // Registered before the app's original bootstrap handler, so defaults are initialized from restored values.
+  document.addEventListener('DOMContentLoaded', function () {
+    restored = readSnapshot();
+    if (restored) {
+      fields().forEach(function (el) {
+        if (!Object.prototype.hasOwnProperty.call(restored.values, el.name)) return;
+        var value = restored.values[el.name];
+        if (typeof value !== 'string' || value.length > 32) return;
+        if (el.tagName === 'SELECT') {
+          if (Array.prototype.some.call(el.options,function (o) { return o.value === value; })) el.value = value;
+        } else if (/^[0-9,.\- ]*$/.test(value)) {
+          el.value = value;
+        }
+      });
+      setTimeout(function () {
+        ['secaoMistura', 'secaoResumoHidratacao'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el && restored.details && typeof restored.details[id] === 'boolean') el.open = restored.details[id];
+        });
+        ['secaoParametros', 'secaoPrescricao'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el || !restored.collapsed || typeof restored.collapsed[id] !== 'boolean') return;
+          el.classList.toggle('is-collapsed',restored.collapsed[id]);
+          var header = el.querySelector('.secao-header');
+          if (header) header.setAttribute('aria-expanded', restored.collapsed[id] ? 'false' : 'true');
+        });
+        if (typeof restored.scrollY === 'number' && Number.isFinite(restored.scrollY))
+          window.scrollTo(0, Math.min(100000, Math.max(0, restored.scrollY)));
+      }, 140);
+    }
+  });
+  form.addEventListener('input', scheduleSave);
+  form.addEventListener('change', scheduleSave);
+  form.addEventListener('click', scheduleSave);
+  form.addEventListener('reset', function () { setTimeout(save, 0); });
+  document.addEventListener('click', function (event) {
+    if (event.target.closest('summary,.secao-header')) setTimeout(save, 0);
+  });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) save(); });
+  window.addEventListener('pagehide', save);
+  window.HvNeoHostPersist = { flush: save, schema:SCHEMA };
+})();
+</script>
 
 <script>
 "use strict";
