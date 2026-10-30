@@ -1,8 +1,8 @@
 <!-- NomeDoApp = "Hidratação Venosa Neonatal" -->
-<!-- VersionName = "1.012.10.22" -->
-<!-- VersionCode = "262951049" -->
-<!-- AndroidVersionName = "1.012.10.22" -->
-<!-- AndroidVersionCode = "262951049"; Timestamp = "2026-10-22T10:49:55-03:00" -->
+<!-- VersionName = "1.014.11.01" -->
+<!-- VersionCode = "262951053" -->
+<!-- AndroidVersionName = "1.014.11.01" -->
+<!-- AndroidVersionCode = "262951053"; Timestamp = "2026-10-22T10:49:55-03:00" -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -464,7 +464,7 @@
       border:1px solid #bfd2e4;
       border-radius:14px;
       padding:14px 16px;
-      background:#fcfeff;
+      background-color:#FFF4CC;
       color:var(--texto);
       line-height:1.45;
       font-family:inherit;
@@ -499,7 +499,7 @@
       line-height:1.2;
       font-size:.9rem;
     }
-    .prontuario-actions #gerarResumoHidratacao{grid-column:1/-1}
+    .prontuario-actions #gerarResumoHidratacao{grid-column:auto}
     .btn-tertiary{
       background:transparent;
       color:#5c6f87;
@@ -535,7 +535,7 @@
         padding:13px 14px;
         font-size:.9rem;
       }
-      .prontuario-actions{grid-template-columns:1fr 1fr}
+      .prontuario-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 48px}
     }
 
     .field-error { color:#b91c1c; font-size:.72rem; line-height:1.25; margin-top:3px; }
@@ -544,7 +544,111 @@
     .calculation-status { color:#475569; font-size:.78rem; line-height:1.3; margin-top:8px; }
     .calculation-status.is-invalid { color:#b91c1c; }
     .btn:disabled { opacity:.55; cursor:default; }
-  </style>
+
+    /* Barra de ações comum: respeita os estilos e a geometria originais. */
+    .standard-top-actions { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .standard-top-actions .btn { min-height:44px; padding:9px 18px; }
+    .standard-bottom-actions { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .standard-bottom-actions .btn { min-height:44px; }
+    @media(max-width:355px) {
+      .standard-top-actions { gap:6px; }
+      .standard-top-actions .btn { padding:9px 12px; }
+      .standard-bottom-actions .btn { padding:9px 14px; }
+    }
+  /* Only the requested bilingual control and reference citation; all original layout rules remain intact. */
+    #secaoParametros .btn-row{flex-wrap:nowrap;gap:6px}
+    #secaoParametros .btn-row>.btn{padding:9px 8px}
+    .hvneo-language-control{display:flex;gap:6px;align-items:center;min-height:40px;white-space:nowrap}
+    .hvneo-language-control label{font-size:.83rem;font-weight:700;color:var(--texto)}
+    .hvneo-language-control select{min-height:40px;width:88px;padding:6px;border:1.5px solid var(--borda);border-radius:8px;background:#f8fbff;color:var(--texto);font:inherit;font-size:.84rem}
+    @media(max-width:375px){.hvneo-language-control{gap:5px}.hvneo-language-control label{display:block;font-size:.76rem}.hvneo-language-control select{width:78px;padding:6px 4px}.standard-top-actions{gap:8px}.standard-top-actions .btn{padding:9px 12px}#secaoParametros .btn-row>.btn{padding:9px 7px;font-size:.8rem}}
+    .hvneo-bibliography ol{margin:0;padding-left:23px;line-height:1.55}
+    .hvneo-bibliography li{padding:3px 0;overflow-wrap:anywhere}
+    
+/* Ações da prescrição: Gerar, Copiar e retorno ao topo. */
+.prontuario-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 48px}
+.prontuario-actions .hvneo-up-arrow{width:48px;min-width:48px;padding:0}
+/* Padronização visual do cabeçalho, botões, referências e rodapé: Preparo/Apgar. */
+header{max-width:980px;margin:0 auto 20px;padding:20px;background:linear-gradient(135deg,#f8fbff,#dbeafe);border:1px solid #cbd5e1;border-radius:22px;box-shadow:0 16px 34px rgba(18,44,73,.10)}
+header h1{display:flex;align-items:center;justify-content:center;gap:9px;font-size:clamp(1.35rem,3.5vw,2.05rem);line-height:1.05;letter-spacing:normal}
+header .hvneo-title-icon{flex:0 0 auto;font-size:1em;line-height:1}
+header p{margin:10px auto 0;max-width:64ch;line-height:1.55;font-size:.92rem}
+.wrapper,.hvneo-after-form{max-width:980px;margin-left:auto;margin-right:auto}
+.standard-top-actions{flex-wrap:nowrap;margin-top:14px;gap:10px}
+.standard-top-actions .btn-reset{border:1px solid #cbd5e1;background:#f1f5f9;border-radius:10px;color:#1e293b;min-height:44px;white-space:nowrap}
+.hvneo-language-control{gap:7px}
+.hvneo-language-control label{font-weight:600;font-size:.92rem}
+.hvneo-language-control select{width:89px;min-height:44px;border-radius:10px;background:#fff;font-size:.94rem;font-weight:600}
+.hvneo-bottom-actions{flex-wrap:nowrap;justify-content:flex-start;gap:10px}
+.hvneo-bottom-actions .btn{flex:1;min-width:0}
+.hvneo-up-arrow{width:48px;min-width:48px;min-height:44px;padding:8px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #cbd5e1;border-radius:10px;background:#eef3f8;color:#1a3a6b;cursor:pointer}
+.hvneo-up-arrow svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.hvneo-up-arrow:focus-visible{outline:3px solid #2563a8;outline-offset:2px}
+.hvneo-bottom-actions .hvneo-up-arrow{flex:0 0 48px}
+.hvneo-after-form{margin-top:0}
+.hvneo-result-return{display:flex;justify-content:flex-end;margin-top:0;margin-bottom:12px}
+#hvneoReferences{margin-top:18px}
+#hvneoReferences+.legal-disclaimer{margin-top:6px}
+.hvneo-footer-row{position:relative;min-height:48px;display:flex;align-items:center;justify-content:center;margin-top:12px}
+.hvneo-footer-row .signature-block{margin:0;padding:0 54px;width:100%;text-align:center;font-size:14px;line-height:1.5}
+.hvneo-footer-row .hvneo-up-arrow{position:absolute;right:0;top:50%;transform:translateY(-50%)}
+@media(max-width:560px){header{padding:20px}header h1{font-size:clamp(1.3rem,5.5vw,1.6rem)}.hvneo-bottom-actions{gap:7px}.hvneo-bottom-actions .btn{padding-left:7px;padding-right:7px}}
+@media(max-width:380px){.standard-top-actions{gap:7px}.standard-top-actions .btn-reset{padding:9px;font-size:.86rem}.hvneo-language-control{gap:5px}.hvneo-language-control label{font-size:.84rem}.hvneo-language-control select{width:82px;padding:8px 5px;font-size:.85rem}}
+
+/* Seletor de idioma padronizado com HvIso: mesmas medidas, cores e bordas. */
+.hvneo-language-control{display:flex;align-items:center;gap:6px;min-width:0}
+.hvneo-language-control label{font-size:.92rem;font-weight:600;white-space:nowrap;color:inherit}
+.hvneo-language-control select{min-height:44px;width:94px;min-width:0;border:1.5px solid #cbd5e1;border-radius:10px;background:#fff;color:#1e293b;font:inherit;padding:8px 6px}
+@media(max-width:370px){.hvneo-language-control{gap:4px}.hvneo-language-control label{font-size:.84rem}.hvneo-language-control select{width:86px;font-size:.86rem;padding:8px 4px}}
+
+/* Ajustes autorizados HvNeo — escopo visual e acessibilidade. */
+.hero{padding:20px;background:linear-gradient(135deg,#f8fbff,#dbeafe);border:1px solid #CBD5E1;border-radius:22px;box-shadow:0 16px 34px rgba(18,44,73,.10);text-align:center;margin-bottom:0}
+.hero h1{display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:8px;margin:0;color:#1a3a6b;font-size:clamp(1.35rem,3.5vw,2.05rem);font-weight:700;letter-spacing:-.5px;line-height:1.15}
+.hero p{margin:4px 0 0;color:#61778f;font-size:.92rem;line-height:1.55;text-align:center}
+.header-controls{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px auto 14px}
+.header-controls .btn{min-height:44px;white-space:nowrap}
+.hvneo-language-control select{width:94px;min-height:44px}
+.hvneo-bottom-actions{margin-top:14px}
+.hvneo-recovered-notice{margin-top:12px;padding:10px 12px;border:1px solid #B45309;border-radius:10px;background:#FDE68A;color:#713F12;font-size:13px;line-height:1.4}
+.hvneo-recovered-notice[hidden]{display:none!important}
+.hvneo-recovered-notice strong{display:block;font-size:14px;font-weight:600;margin-bottom:4px}
+.hvneo-recovered-notice span{display:block}
+.prontuario-textarea{background-color:#FFF4CC;background-image:none}
+#secaoPrescricao,#secaoResumoHidratacao{background:#fff}
+#prescricaoEtapaTexto{background:#FFF4CC}
+#prescricaoEtapaTexto.is-recalculated{background:#FFF4CC}
+.hvneo-result-return{margin-top:0;margin-bottom:10px}
+.campo input,.campo select{min-height:44px}
+.prescricao-resultados-compactos .campo input{min-height:44px}
+@media(max-width:560px){.hero h1{font-size:clamp(1.3rem,5.5vw,1.6rem)}}
+  /* Prescrição: altura determinada pelo conteúdo, sem rolagem interna. */
+  #prescricaoEtapaTexto.prontuario-textarea {
+    height:auto;
+    min-height:0;
+    overflow-y:hidden;
+    resize:none;
+  }
+  @media(max-width:560px) {
+    #prescricaoEtapaTexto.prontuario-textarea {height:auto;min-height:0;}
+  }
+
+/* Correção solicitada: separação das referências e barra de idiomas no padrão HvIso. */
+.hvneo-after-form{width:100%;max-width:980px;margin:0 auto}
+#hvneoReferences{margin-top:24px}
+#hvneoReferences + .legal-disclaimer{margin-top:12px}
+.header-controls.standard-top-actions{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px auto 16px}
+.header-controls .btn-reset{min-height:44px;flex-shrink:0}
+.header-controls .hvneo-language-control{display:flex;align-items:center;gap:6px;min-width:0;white-space:nowrap}
+.header-controls .hvneo-language-control label{font-size:.92rem;font-weight:600;color:#1e293b;white-space:nowrap}
+
+@media(max-width:370px){.header-controls.standard-top-actions{gap:7px}.header-controls .hvneo-language-control{gap:4px}.header-controls .hvneo-language-control label{font-size:.84rem}}
+
+/* P1/P2: controles superiores; sem alterar os controles inferiores. */
+.header-controls.standard-top-actions .btn-reset{font-family:Arial,Helvetica,sans-serif;font-weight:700;background:#EEF3F8;color:#264764;border:1.5px solid #CBD5E1;border-radius:10px;min-height:44px}
+.header-controls .hvneo-language-control label{font-family:Arial,Helvetica,sans-serif;font-size:.92rem;font-weight:600}
+.header-controls .hvneo-language-control select{min-height:44px;width:auto;min-width:112px;max-width:100%;box-sizing:border-box;padding:8px 24px 8px 8px;border:1.5px solid #CBD5E1;border-radius:10px;background-color:#EEF3F8;color:#264764;font-family:Arial,Helvetica,sans-serif;font-size:.92rem;font-weight:400;color-scheme:light;cursor:pointer}
+.header-controls .hvneo-language-control select:focus-visible{outline:2px solid #2563A8;outline-offset:2px}
+</style>
 </head>
 <body>
 
@@ -556,14 +660,19 @@
   </div>
 </div>
 
-<header>
-  <div class="espaco-antes-titulo" aria-hidden="true"></div>
-  <h1>💧Hidratação Venosa Neonatal</h1>
+<header class="hero" id="sectionHero">
+  <h1><span class="hvneo-title-icon" aria-hidden="true">💧</span><span>Hidratação Venosa Neonatal</span></h1>
   <p>Preparo por etapas de Hidratação Venosa Neonatal com mistura de soluções e cálculo da Taxa de Infusão de Glicose</p>
 </header>
+<div class="standard-top-actions header-controls">
+  <button type="reset" form="formHidra" class="btn btn-reset" data-clear-top="true">Limpar dados</button>
+  <div class="hvneo-language-control"><label for="hvneoLanguageSelect">Idioma</label><select id="hvneoLanguageSelect" aria-label="Selecionar idioma"><option value="pt-BR">Português</option><option value="en-US">English</option></select></div>
+</div>
 
 <form id="formHidra" autocomplete="off">
 <div class="wrapper">
+
+      <div id="hvneoRecoveredNotice" class="hvneo-recovered-notice" role="status" hidden><strong>ⓘ Dados recuperados</strong><span>Dados anteriores foram recuperados. Confirme as informações antes de utilizar os resultados.</span></div>
 
   <!-- ====== SEÇÃO 1: PARÂMETROS DE ENTRADA ====== -->
   <div class="secao" id="secaoParametros">
@@ -572,7 +681,7 @@
       <div class="grid-2">
         <div class="campo">
           <label>Peso de cálculo</label>
-          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso" value="2,800">
+          <input type="text" inputmode="decimal" maxlength="6" name="peso" value="2,800">
           <span class="unidade">kg</span>
         </div>
         <div class="campo">
@@ -615,13 +724,10 @@
           <span class="unidade">mg/kg/dia de gluconato de cálcio 10%</span>
         </div>
       </div>
-      <div class="btn-row">
-        <button type="button" class="btn btn-primary" id="btnCalcular">
-          Calcular
-        </button>
-        <button type="reset" class="btn btn-reset" data-clear-top="true">
-          Limpar Dados
-        </button>
+      <div class="standard-bottom-actions hvneo-bottom-actions">
+        <button type="button" class="btn btn-primary" id="btnCalcular">Calcular</button>
+        <button type="reset" class="btn btn-reset">Limpar</button>
+        <button type="button" class="hvneo-up-arrow" aria-label="Voltar ao início" title="Voltar ao início"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
       </div>
     </div>
   </div>
@@ -681,6 +787,11 @@
       </div>
       <div id="alertaAjusteAutomaticoMistura" class="alerta-solucao alerta-ajuste-automatico is-hidden" role="alert" aria-live="assertive"></div>
       <div id="alertaMistura" class="alerta-solucao is-hidden" role="alert" aria-live="polite"></div>
+      <div class="standard-bottom-actions hvneo-bottom-actions hvneo-added-actions">
+        <button type="button" class="btn btn-primary hvneo-extra-calculate">Calcular</button>
+        <button type="button" class="hvneo-up-arrow" aria-label="Voltar ao início" title="Voltar ao início"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+      </div>
+
     </div>
   </details>
 
@@ -753,7 +864,7 @@
         </div>
         <div class="campo">
           <label>Peso de cálculo</label>
-          <input type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="6" name="peso1" value="0">
+          <input type="text" inputmode="decimal" maxlength="6" name="peso1" value="0">
           <span class="unidade">kg</span>
         </div>
       </div>
@@ -779,6 +890,11 @@
         </div>
       </div>
       <div id="alertaSolucao" class="alerta-solucao is-hidden" role="alert" aria-live="polite"></div>
+      <div class="standard-bottom-actions hvneo-bottom-actions hvneo-added-actions">
+        <button type="button" class="btn btn-primary hvneo-extra-calculate">Calcular</button>
+        <button type="button" class="hvneo-up-arrow" aria-label="Voltar ao início" title="Voltar ao início"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+      </div>
+
 
     </div>
   </div>
@@ -788,32 +904,58 @@
     <summary class="secao-header">④ Prescrição</summary>
     <div class="secao-body">
       <div class="prontuario-content">
-        <textarea id="prescricaoEtapaTexto" rows="12" class="prontuario-textarea" placeholder="A prescrição da hidratação será montada automaticamente conforme os cálculos atuais."></textarea>
+        <textarea id="prescricaoEtapaTexto" rows="1" class="prontuario-textarea" placeholder="A prescrição da hidratação será montada automaticamente conforme os cálculos atuais."></textarea>
         <p id="calculationStatus" class="calculation-status" role="status" aria-live="polite"></p>
         <div class="prontuario-actions">
-          <button type="button" class="btn btn-primary" id="gerarResumoHidratacao">Gerar Prescrição</button>
-          <button type="button" class="btn btn-secondary" id="copiarResumoHidratacao">Copiar Prescrição</button>
-          <button type="button" class="btn btn-tertiary" id="limparResumoHidratacao">Limpar</button>
+          <button type="button" class="btn btn-primary" id="gerarResumoHidratacao">Gerar</button>
+          <button type="button" class="btn btn-secondary" id="copiarResumoHidratacao">Copiar</button>
+          <button type="button" class="hvneo-up-arrow" aria-label="Voltar ao início" title="Voltar ao início"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
         </div>
         <div class="prontuario-toast" id="prescricaoEtapaCopyStatus" aria-live="polite" aria-atomic="true"></div>
       </div>
     </div>
   </details>
 
+
 </div><!-- /wrapper -->
 </form>
 
 
+<div class="hvneo-after-form">
+<details class="legal-disclaimer legal-disclaimer-collapsible" id="hvneoReferences">
+  <summary>Referências</summary>
+  <div class="legal-disclaimer-content hvneo-bibliography"><ol>
+    <li>TRISSEL, L. A. <em>Handbook on Injectable Drugs</em>. 18. ed. Bethesda: American Society of Health-System Pharmacists, 2015.</li>
+  </ol></div>
+</details>
 <details class="legal-disclaimer legal-disclaimer-collapsible">
 <summary>Aviso Legal e Isenção de Responsabilidade</summary>
 <div class="legal-disclaimer-content">
         Este software e todas as informações nele contidas são fornecidos exclusivamente com propósitos educacionais e de auxílio à referência médica. ESTE SISTEMA NÃO SUBSTITUI O JULGAMENTO CLÍNICO INDIVIDUAL, A ANAMNESE E O EXAME FÍSICO. As informações aqui apresentadas não devem ser utilizadas isoladamente para o diagnóstico, conduta ou tratamento de pacientes. A responsabilidade final por qualquer decisão clínica, prescrição ou intervenção é exclusiva do profissional de saúde assistente, devidamente habilitado. Os desenvolvedores não garantem a precisão absoluta de todos os dados e isentam-se de responsabilidade por quaisquer danos diretos, indiretos, materiais ou morais que resultem do uso inadequado, interpretação equivocada ou confiança exclusiva nas informações deste sistema. Pacientes e indivíduos leigos que utilizarem este software devem sempre buscar a orientação de um médico qualificado antes de tomar qualquer decisão sobre sua saúde.
       </div>
 </details>
-<div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong><br><span class="version-name">1.012.10.22</span></div>
+<div class="hvneo-footer-row"><div class="signature-block"><strong>Desenvolvido por Adão L. L. Couto</strong><br><span class="version-name">1.014.11.01</span></div><button type="button" class="hvneo-up-arrow" aria-label="Voltar ao início" title="Voltar ao início"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
 
-<div class="spacer-3lines" aria-hidden="true"></div>
 
+<script id="hvneo-prescription-autoheight">
+(function () {
+  'use strict';
+  var field = document.getElementById('prescricaoEtapaTexto');
+  if (!field) return;
+  function fit() {
+    if (!field.getClientRects().length) return;
+    field.style.height = 'auto';
+    field.style.height = Math.ceil(field.scrollHeight + 2) + 'px';
+  }
+  window.hvneoFitPrescription = fit;
+  field.addEventListener('input', fit);
+  window.addEventListener('resize', fit);
+  new MutationObserver(fit).observe(document.documentElement, {attributes:true,attributeFilter:['lang']});
+  var section = document.getElementById('secaoResumoHidratacao');
+  if (section) section.addEventListener('toggle', function () { requestAnimationFrame(fit); });
+  requestAnimationFrame(fit);
+})();
+</script>
 
 <script id="hvneo-state-persistence">
 /* Android WebView state adapter: no changes to clinical calculation logic. */
@@ -867,7 +1009,7 @@
       var el = document.getElementById(id);
       if (el) collapsed[id] = el.classList.contains('is-collapsed');
     });
-    try { localStorage.setItem(KEY, JSON.stringify({schema:SCHEMA, values:values, details:details, collapsed:collapsed, scrollY:Math.max(0,Math.round(window.scrollY||0))})); }
+    try { localStorage.setItem(KEY, JSON.stringify({schema:SCHEMA, values:values, details:details, collapsed:collapsed, scrollY:0})); }
     catch (_) { /* browsers with blocked storage still calculate normally */ }
   }
   function scheduleSave() {
@@ -888,20 +1030,23 @@
           el.value = value;
         }
       });
+      var recoveredNotice = document.getElementById('hvneoRecoveredNotice');
+      if (recoveredNotice) recoveredNotice.hidden = false;
       setTimeout(function () {
         ['secaoMistura', 'secaoResumoHidratacao'].forEach(function (id) {
           var el = document.getElementById(id);
           if (el && restored.details && typeof restored.details[id] === 'boolean') el.open = restored.details[id];
         });
+        // Parâmetros inicia aberto; Prescrição inicia minimizada, mesmo com sessão recuperada.
         ['secaoParametros', 'secaoPrescricao'].forEach(function (id) {
           var el = document.getElementById(id);
-          if (!el || !restored.collapsed || typeof restored.collapsed[id] !== 'boolean') return;
-          el.classList.toggle('is-collapsed',restored.collapsed[id]);
+          if (!el) return;
+          var isOpen = id === 'secaoParametros';
+          el.classList.toggle('is-collapsed', !isOpen);
           var header = el.querySelector('.secao-header');
-          if (header) header.setAttribute('aria-expanded', restored.collapsed[id] ? 'false' : 'true');
+          if (header) header.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         });
-        if (typeof restored.scrollY === 'number' && Number.isFinite(restored.scrollY))
-          window.scrollTo(0, Math.min(100000, Math.max(0, restored.scrollY)));
+        window.scrollTo(0, 0);
       }, 140);
     }
   });
@@ -944,6 +1089,7 @@
   var ALLOWED_STAGE_COUNTS = [1, 2, 3, 4, 6, 8, 12];
   var TOAST_DURATION_MS = 5000;
   var ALLOWED_GLUCOSE = [0, 5, 10, 25, 50];
+  var CALCIUM_GLUCONATE_OSMOLARITY_MOSM_PER_ML = 0.696;
   var DEXTROSE_MONOHYDRATE_MW = 198.17; // g/mol; dextrose monohidratada usada em soluções IV
 
   var ALERT_LIMITS = {
@@ -1033,51 +1179,56 @@
   }
 
 
-  function getMaskedWeightNumericValue(rawValue) {
-    var rawDigits = String(rawValue || "").replace(/\D/g, "");
-    if (rawDigits === "") return NaN;
-
-    var digits = rawDigits.slice(0, 5);
-    var formatted;
-
-    if (digits.length === 1) {
-      formatted = digits;
-    } else if (digits.length <= 4) {
-      formatted = digits.charAt(0) + "," + digits.slice(1);
-    } else {
-      formatted = digits.slice(0, 2) + "," + digits.slice(2);
+  // Máscara neonatal progressiva: 1 -> 1; 12 -> 1,2; 1234 -> 1,234;
+  // 12345 -> 12,345. Separador digitado explicitamente inicia a parte decimal.
+  function maskWeightInputValue(rawValue, explicitSeparator) {
+    var raw = String(rawValue == null ? "" : rawValue).replace(/[^0-9,.]/g, "");
+    if (!raw) return "";
+    if (explicitSeparator) {
+      var pos = raw.search(/[,.]/);
+      if (pos !== -1) {
+        var whole = raw.slice(0, pos).replace(/\D/g, "").replace(/^0+(?=\d)/, "") || "0";
+        var decimal = raw.slice(pos + 1).replace(/\D/g, "").slice(0, 3);
+        return whole.slice(0, 2) + "," + decimal;
+      }
     }
-
-    return parseDecimal(formatted);
-  }
-
-  function formatWeightMaxForInput() {
-    // A máscara do campo de peso usa precisão de 3 casas para permitir digitar 20,000 kg.
-    return MAX_WEIGHT_KG.toFixed(3).replace(".", ",");
-  }
-
-  function isWeightInputAboveMax(rawValue) {
-    var rawDigits = String(rawValue || "").replace(/\D/g, "");
-    if (rawDigits === "") return false;
-    if (rawDigits.length > 5) return true;
-
-    var numericValue = getMaskedWeightNumericValue(rawValue);
-    return Number.isFinite(numericValue) && numericValue > MAX_WEIGHT_KG + EPS;
-  }
-
-  function maskWeightInputValue(rawValue) {
-    var rawDigits = String(rawValue || "").replace(/\D/g, "");
-    var digits = rawDigits.slice(0, 5);
-
-    if (digits === "") return "";
-
-    // Padrão durante a digitação:
-    // 3 -> 3 | 30 -> 3,0 | 300 -> 3,00 | 3000 -> 3,000 | 20000 -> 20,000
-    // O bloqueio de valores acima de 20 kg é feito no handler de digitação,
-    // que interrompe a entrada em vez de saltar automaticamente para 20,000.
-    if (digits.length === 1) return digits;
+    var digits = raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "").slice(0, 5);
+    if (digits.length <= 1) return digits;
     if (digits.length <= 4) return digits.charAt(0) + "," + digits.slice(1);
     return digits.slice(0, 2) + "," + digits.slice(2);
+  }
+
+  function getMaskedWeightNumericValue(rawValue, explicitSeparator) {
+    return parseDecimal(maskWeightInputValue(rawValue, explicitSeparator));
+  }
+
+  function isWeightInputAboveMax(rawValue, explicitSeparator) {
+    var digits = String(rawValue == null ? "" : rawValue).replace(/\D/g, "");
+    if (digits.length > 5) return true;
+    var candidate = getMaskedWeightNumericValue(rawValue, explicitSeparator);
+    return Number.isFinite(candidate) && candidate > MAX_WEIGHT_KG + EPS;
+  }
+
+  // Mantém o cursor na mesma posição numérica quando uma máscara insere vírgula.
+  function setMaskedValuePreservingCaret(el, masked) {
+    if (el.value === masked) return;
+    var original = el.value;
+    var start = el.selectionStart == null ? original.length : el.selectionStart;
+    var end = el.selectionEnd == null ? original.length : el.selectionEnd;
+    function position(index) {
+      if (index >= original.length) return masked.length;
+      var count = (original.slice(0, index).match(/\d/g) || []).length;
+      if (!count) return Math.min(index, masked.length);
+      var seen = 0;
+      for (var j = 0; j < masked.length; j++) {
+        if (/\d/.test(masked.charAt(j))) seen++;
+        if (seen === count) return j + 1;
+      }
+      return masked.length;
+    }
+    var newStart = position(start), newEnd = position(end);
+    el.value = masked;
+    try { el.setSelectionRange(newStart, Math.max(newStart, newEnd)); } catch (ignore) {}
   }
 
   // Máscaras decimais simples por campo: nº de dígitos inteiros e decimais.
@@ -1213,13 +1364,8 @@
 
     var referenceSnapshot = snapshot || state;
 
-    // Peso neonatal: abaixo de 5 kg, exibir 3 casas decimais; a partir de 5 kg, 1 casa decimal.
-    if (name === "peso" || name === "peso1") {
-      var pesoReferencia = referenceSnapshot && referenceSnapshot.clinical
-        ? Number(referenceSnapshot.clinical.peso)
-        : NaN;
-      return Number.isFinite(pesoReferencia) && pesoReferencia < 5 ? 3 : 1;
-    }
+    // Peso em kg: sempre três casas decimais ao confirmar, sem alterar seu valor clínico.
+    if (name === "peso" || name === "peso1") return 3;
 
     // O volume base glicosado por etapa fecha a soma exibida e deve manter 1 casa decimal em todos os pesos.
     if (name === "volumetotal" || name === "volume3") return 1;
@@ -1284,7 +1430,7 @@
     var potassioMeq = safeNonNegative(snapshot.prescricao.potassiototal) * 1.34;
     var kclMosm = potassioMeq * 2;
 
-    var calcioMosm = safeNonNegative(snapshot.prescricao.calciototal) * 0.66;
+    var calcioMosm = safeNonNegative(snapshot.prescricao.calciototal) * CALCIUM_GLUCONATE_OSMOLARITY_MOSM_PER_ML;
 
     return ((glicoseMosm + naclMosm + kclMosm + calcioMosm) / volumeFinalMl) * 1000;
   }
@@ -2012,7 +2158,7 @@
     var osmolesFixos =
       (sodioMeq * 2) +
       (potassioMeq * 2) +
-      (calcioVolumeMl * 0.66);
+      (calcioVolumeMl * CALCIUM_GLUCONATE_OSMOLARITY_MOSM_PER_ML);
 
     if (hasGlicoseCalculada && glicoseMosmPorMl >= targetPerMl - EPS) {
       return (
@@ -2333,13 +2479,15 @@
       " mL/hora de " + intervalText + "/" + intervalText + " horas");
     lines.push("TIG = " + prescriptionFieldText("tig", snapshot.mistura.tig, snapshot) + " mg/kg/minuto");
 
-    return lines.join("\n");
+    var prescriptionSource = lines.join("\n");
+    return window.HvNeoLanguage ? window.HvNeoLanguage.presentPrescription(prescriptionSource) : prescriptionSource;
   }
 
   function renderPrescriptionStageText(snapshot) {
     var display = document.getElementById("prescricaoEtapaTexto");
     if (!display) return;
     display.value = buildPrescriptionStageText(snapshot);
+    window.hvneoFitPrescription?.();
   }
 
   function copyPrescriptionTextFallback(copyText) {
@@ -2385,6 +2533,7 @@
       generateButton.addEventListener("click", function () {
         if (!refreshResultStatus()) return;
         display.value = buildPrescriptionStageText(state);
+        window.hvneoFitPrescription?.();
         showStatus("Prescrição atualizada.", 1500);
       });
     }
@@ -2395,6 +2544,7 @@
         if (!refreshResultStatus()) return;
         var copyRevision = UI_STATE.revision;
         if (!display.value.trim()) display.value = buildPrescriptionStageText(state);
+        window.hvneoFitPrescription?.();
         var copyText = display.value || "";
         if (!copyText.trim()) {
           showStatus("Aguardando cálculo.", 1800);
@@ -2425,6 +2575,7 @@
       clearButton.dataset.bound = "true";
       clearButton.addEventListener("click", function () {
         display.value = "";
+        window.hvneoFitPrescription?.();
         showStatus("Texto limpo.", 1200);
       });
     }
@@ -2856,19 +3007,19 @@
 
   function advanceField(name) {
     if (Object.keys(UI_STATE.pendingFields).length > 0 && !confirmUiFields(name, { moveFocus: true })) return;
-    if (name === "calcio") {
-      scrollSectionToTop("secaoResumoHidratacao");
-      focusControl(document.getElementById("copiarResumoHidratacao"));
-      return;
-    }
-    var controls = getEditableControls().filter(isControlVisible);
+    // A navegação pelo teclado percorre apenas campos de texto; seletores
+    // de etapas e concentração de NaCl permanecem acessíveis por toque.
+    // Sequência explícita dos campos numéricos de entrada, sem seletores.
+    // Não depender da ordem de foco nativa do teclado Android.
+    var inputOrder = ["peso", "volume", "sodio", "potassio", "calcio"];
+    var controls = inputOrder.map(function (fieldName) { return form.elements.namedItem(fieldName); })
+      .filter(function (element) { return element && isControlVisible(element); });
     var index = controls.indexOf(form[name]);
-    var nextInput = controls.slice(index + 1).filter(function (element) { return element.tagName === "INPUT"; })[0];
-    if (index >= 0 && nextInput) focusControl(nextInput);
-    else {
-      scrollSectionToTop("secaoResumoHidratacao");
-      focusControl(document.getElementById("copiarResumoHidratacao"));
-    }
+    var nextInput = index >= 0 ? controls.slice(index + 1).filter(function (element) {
+      return !element.disabled && !element.readOnly && element.getClientRects().length > 0;
+    })[0] : null;
+    if (nextInput) focusControl(nextInput);
+    // O último campo não provoca navegação automática aos resultados.
   }
 
   function applyFieldMetadata() {
@@ -2886,7 +3037,7 @@
 
   function clearTransientUi() {
     var prescriptionTextDisplay = document.getElementById("prescricaoEtapaTexto");
-    if (prescriptionTextDisplay) prescriptionTextDisplay.value = "";
+    if (prescriptionTextDisplay) { prescriptionTextDisplay.value = ""; window.hvneoFitPrescription?.(); }
     var prescriptionCopyStatus = document.getElementById("prescricaoEtapaCopyStatus");
     if (prescriptionCopyStatus) prescriptionCopyStatus.textContent = "";
 
@@ -3139,7 +3290,7 @@
         event.preventDefault();
         toggleSectionOpen(sectionId);
       });
-      setSectionOpen(sectionId, true);
+      setSectionOpen(sectionId, sectionId !== "secaoPrescricao");
     });
 
     var mistura = document.getElementById("secaoMistura");
@@ -3185,8 +3336,25 @@
 
   function handleCalculateButtonClick(targetSectionId) {
     if (updating) return;
+    // Encerra a edição antes de calcular, solicitando ao Android que recolha
+    // o teclado. Não deslocar o foco se houver erro de validação.
+    var active = document.activeElement;
+    if (active && form.contains(active) &&
+        (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
+      active.blur();
+    }
+    cancelFieldNavigation();
+    // Campo já normalizado durante a edição: evitar reinterpretação de decimais explícitos.
     if (confirmUiFields(null, { force: true, moveFocus: true }) && targetSectionId) {
-      scrollSectionToTop(targetSectionId);
+      var destination = document.getElementById(targetSectionId);
+      if (destination && "open" in destination) destination.open = true;
+      if (targetSectionId === "secaoPrescricao") setSectionOpen("secaoPrescricao", true);
+      // O redimensionamento do viewport pelo teclado virtual é assíncrono.
+      // Reposiciona após o fechamento, sem depender de um segundo toque.
+      window.setTimeout(function () {
+        if (!destination) return;
+        destination.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+      }, 240);
     }
   }
 
@@ -3208,50 +3376,83 @@
         el.addEventListener("focus", function () {
           cancelFieldNavigation();
           session.replaceOnFirstEdit = el.value !== "";
-          if (session.replaceOnFirstEdit) el.select();
-          if (name === "peso" || name === "peso1") el.dataset.weightLastValid = el.value;
+          // Não selecionar automaticamente o texto: evita o menu nativo
+          // Cortar/Copiar/Perguntar à IA ao avançar entre campos no Android.
+          if (name === "peso" || name === "peso1") {
+            // Em touch, o click apos focus pode recolocar o cursor no fim.
+            // Preservar uma unica selecao integral no primeiro toque; toques
+            // posteriores continuam permitindo editar o meio do numero.
+            session.selectOnFirstPointerRelease = !!el.value;
+            el.dataset.weightLastValid = el.value;
+            session.weightExplicitSeparator = false;
+          }
         });
-        el.addEventListener("beforeinput", function (event) {
-          if (session.replaceOnFirstEdit && /^(insert|delete)/.test(event.inputType || "")) el.select();
-        });
+        if (false && (name === "peso" || name === "peso1")) {
+          el.addEventListener("click", function () {
+            if (!session.selectOnFirstPointerRelease) return;
+            session.selectOnFirstPointerRelease = false;
+            var selectedValue = el.value;
+            // O navegador pode reposicionar o cursor APOS o evento click.
+            // Agendar a selecao apos a acao nativa, sem interferir na edicao seguinte.
+            window.setTimeout(function () {
+              if (!session.dirty && document.activeElement === el && el.value === selectedValue && el.value) {
+                el.select();
+              }
+            }, 0);
+          });
+          el.addEventListener("beforeinput", function (event) {
+            if (event && typeof event.data === "string" && /[,.]/.test(event.data)) session.weightExplicitSeparator = true;
+          });
+          el.addEventListener("paste", function (event) {
+            var pasted = event.clipboardData && event.clipboardData.getData("text") || "";
+            if (/[,.]/.test(pasted)) session.weightExplicitSeparator = true;
+          });
+        }
         el.addEventListener("input", function (event) {
           if (updating) return;
-          if (session.replaceOnFirstEdit) {
-            if (/^insert/.test(event.inputType || "") && typeof event.data === "string") el.value = event.data;
-            else if (/^delete/.test(event.inputType || "")) el.value = "";
-            session.replaceOnFirstEdit = false;
-          }
+          session.replaceOnFirstEdit = false;
+          if (name === "peso" || name === "peso1") session.selectOnFirstPointerRelease = false;
           session.dirty = true;
           markFieldPending(name);
+          var raw = el.value;
           var masked;
           if (name === "peso" || name === "peso1") {
-            if (isWeightInputAboveMax(el.value)) {
-              el.value = el.dataset.weightLastValid != null ? el.dataset.weightLastValid : "";
-              try { el.setSelectionRange(el.value.length, el.value.length); } catch (ignore) {}
+            if (typeof event.data === "string" && /[,.]/.test(event.data)) session.weightExplicitSeparator = true;
+            var deleting = /^delete/.test(event.inputType || "");
+            if (deleting && !/[,.]/.test(raw)) session.weightExplicitSeparator = false;
+            masked = deleting ? raw.replace(/[^0-9,.]/g, "") : maskWeightInputValue(raw, session.weightExplicitSeparator);
+            if (!deleting && isWeightInputAboveMax(raw, session.weightExplicitSeparator)) {
+              setMaskedValuePreservingCaret(el, el.dataset.weightLastValid || "");
               failFieldUpdate(new Error("Peso > 20 kg não suportado por esta ferramenta."), name, false);
               return;
             }
-            masked = maskWeightInputValue(el.value);
             el.dataset.weightLastValid = masked;
           } else if (DECIMAL_MASK_FIELDS[name]) {
             var spec = DECIMAL_MASK_FIELDS[name];
-            masked = maskDecimalInputValue(el.value, spec.intDigits, spec.decDigits);
+            masked = maskDecimalInputValue(raw, spec.intDigits, spec.decDigits);
           } else {
-            masked = el.value;
+            masked = raw;
           }
-          if (el.value !== masked) {
-            el.value = masked;
-            try { el.setSelectionRange(el.value.length, el.value.length); } catch (ignore) {}
-          }
+          setMaskedValuePreservingCaret(el, masked);
         });
         el.addEventListener("blur", function () {
           session.replaceOnFirstEdit = false;
+          if (name === "peso" || name === "peso1") session.selectOnFirstPointerRelease = false;
+          if ((name === "peso" || name === "peso1") && session.dirty)
+            el.value = maskWeightInputValue(el.value, session.weightExplicitSeparator);
           if (session.dirty && UI_STATE.pendingFields[name]) confirmUiFields(name);
         });
       }
 
       el.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" && !event.isComposing) {
+        if ((event.key === "Enter" || event.key === "Next") && !event.isComposing) {
+          event.preventDefault();
+          advanceField(name);
+        }
+      });
+      // Alguns teclados Android enviam insertLineBreak em vez de keydown Enter.
+      if (el.tagName === "INPUT") el.addEventListener("beforeinput", function (event) {
+        if (event.inputType === "insertLineBreak" && !event.isComposing) {
           event.preventDefault();
           advanceField(name);
         }
@@ -3263,6 +3464,12 @@
       handleCalculateButtonClick("secaoResumoHidratacao");
     });
 
+    document.querySelectorAll(".hvneo-extra-calculate").forEach(function (button) {
+      button.addEventListener("click", function () {
+        handleCalculateButtonClick("secaoResumoHidratacao");
+      });
+    });
+
     form.addEventListener("submit", function (event) {
       event.preventDefault();
       handleCalculateButtonClick("secaoResumoHidratacao");
@@ -3270,6 +3477,9 @@
     form.addEventListener("reset", function (event) {
       event.preventDefault();
       resetToZeroState();
+      // O aviso indica recuperação anterior; ao limpar, deixa de ser aplicável.
+      var recoveredNotice = document.getElementById("hvneoRecoveredNotice");
+      if (recoveredNotice) recoveredNotice.hidden = true;
       window.requestAnimationFrame(function () {
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
@@ -3379,7 +3589,7 @@
       var snapshot = createKnownGoodState();
       if (formatField("peso", snapshot.clinical.peso, snapshot) !== "3,000") throw new Error("Peso < 5 kg deve exibir 3 casas decimais.");
       snapshot.clinical.peso = 5;
-      if (formatField("peso", snapshot.clinical.peso, snapshot) !== "5,0") throw new Error("Peso >= 5 kg deve exibir 1 casa decimal.");
+      if (formatField("peso", snapshot.clinical.peso, snapshot) !== "5,000") throw new Error("Peso >= 5 kg deve exibir 3 casas decimais.");
       snapshot.clinical.peso = 25;
       sanitizeFieldInState("peso", snapshot);
       if (Math.abs(snapshot.clinical.peso - 20) > 1e-9) throw new Error("Peso máximo deve ser 20 kg.");
@@ -3449,6 +3659,32 @@
       if (formatField("volume", snapshot.clinical.volume, snapshot) !== "70,00") {
         throw new Error("Volume clínico não deve derivar para 70,1 após ciclos direto/inverso.");
       }
+    });
+
+    tests.push(function testPesoNeonatalProgressivo() {
+      var expected = {"1":"1","12":"1,2","123":"1,23","1234":"1,234","12345":"12,345","01234":"1,234","00000":"0"};
+      Object.keys(expected).forEach(function (typed) {
+        if (maskWeightInputValue(typed) !== expected[typed]) throw new Error("Máscara neonatal: " + typed);
+      });
+      assertAlmostEqual(getMaskedWeightNumericValue("12345"), 12.345, "12345 = 12,345 kg");
+      assertAlmostEqual(getMaskedWeightNumericValue("12"), 1.2, "12 = 1,200 kg");
+    });
+    tests.push(function testPesoNeonatalSeparadorManual() {
+      if (maskWeightInputValue("1.1", true) !== "1,1" || maskWeightInputValue("0,350", true) !== "0,350" ||
+          maskWeightInputValue("12,34", true) !== "12,34" || maskWeightInputValue("") !== "") {
+        throw new Error("Separador manual neonatal mudou a grandeza.");
+      }
+      assertAlmostEqual(getMaskedWeightNumericValue("0,350", true), 0.350, "Peso decimal manual 0,350");
+    });
+    tests.push(function testPesoNeonatalLimite() {
+      if (!isWeightInputAboveMax("20001") || isWeightInputAboveMax("20000") ||
+          isWeightInputAboveMax("12345") || !isWeightInputAboveMax("20,001", true))
+        throw new Error("Limite neonatal de 20 kg alterado.");
+    });
+    tests.push(function testPesoNeonatalTresCasasEmTodasIdades() {
+      var sample = createKnownGoodState();
+      sample.clinical.peso = 12.345;
+      if (formatField("peso", sample.clinical.peso, sample) !== "12,345") throw new Error("Peso >= 5 kg perdeu precisão neonatal.");
     });
 
     tests.push(function testAutomaticDecimalMasks() {
@@ -3748,7 +3984,8 @@
 
     bindFieldEvents();
     bindPrescriptionStageCopy();
-    if (form.peso) form.peso.focus({ preventScroll: true });
+    // Sem foco forçado na abertura: evita seleção contextual do Android.
+    window.scrollTo(0, 0);
   }
 
   window.HidraCalculator = {
@@ -3785,5 +4022,87 @@
 </script>
 
 
+<script id="hvneo-bilingual-layer">
+(function(){
+  'use strict';
+  const PAIRS = [["Este software e todas as informações nele contidas são fornecidos exclusivamente com propósitos educacionais e de auxílio à referência médica. ESTE SISTEMA NÃO SUBSTITUI O JULGAMENTO CLÍNICO INDIVIDUAL, A ANAMNESE E O EXAME FÍSICO. As informações aqui apresentadas não devem ser utilizadas isoladamente para o diagnóstico, conduta ou tratamento de pacientes. A responsabilidade final por qualquer decisão clínica, prescrição ou intervenção é exclusiva do profissional de saúde assistente, devidamente habilitado. Os desenvolvedores não garantem a precisão absoluta de todos os dados e isentam-se de responsabilidade por quaisquer danos diretos, indiretos, materiais ou morais que resultem do uso inadequado, interpretação equivocada ou confiança exclusiva nas informações deste sistema. Pacientes e indivíduos leigos que utilizarem este software devem sempre buscar a orientação de um médico qualificado antes de tomar qualquer decisão sobre sua saúde.", "This software and all information it contains are provided exclusively for educational purposes and as a medical reference aid. THIS SYSTEM DOES NOT REPLACE INDIVIDUAL CLINICAL JUDGMENT, MEDICAL HISTORY TAKING, OR PHYSICAL EXAMINATION. Information presented here must not be used in isolation for patient diagnosis, management, or treatment. Responsibility for clinical decisions, prescriptions, or interventions rests entirely with the appropriately qualified treating healthcare professional. The developers do not guarantee the absolute accuracy of all information and disclaim liability for direct, indirect, financial, or non-financial harm arising from inappropriate use, misinterpretation, or exclusive reliance on this system. Patients and nonprofessionals using this software should always seek guidance from a qualified physician before making healthcare decisions."], [" mOsm/L. Soluções muito hipotônicas podem promover entrada de água nas células, edema celular e hemólise, especialmente em infusão rápida, via periférica ou contato com sangue/hemoderivados. Revisar composição da solução, concentração de glicose, eletrólitos, volume final, velocidade de infusão, via de infusão e protocolo institucional antes de infundir.", " mOsm/L. Markedly hypotonic solutions may cause cellular water influx, swelling, and hemolysis, particularly with rapid infusion, peripheral access, or contact with blood products. Review solution composition, dextrose concentration, electrolytes, final volume, infusion rate, access route, and institutional protocol before infusing."], [" mg/mL de gluconato de cálcio na solução. Esse valor está acima de 50 mg/mL, concentração máxima descrita para bolus diluído, e é inadequado como referência para infusão contínua. Para ficar em até 50 mg/mL, o volume total da solução precisaria ser de pelo menos ", " mg/mL of calcium gluconate in solution. This exceeds 50 mg/mL, the maximum concentration described for a diluted bolus, and is unsuitable as a reference for continuous infusion. To remain at or below 50 mg/mL, total solution volume would need to be at least "], ["% exigem revisão da osmolaridade, glicemia, compatibilidade, velocidade de infusão e via de acesso; em geral, evitar acesso periférico de rotina e considerar acesso central ou umbilical com ponta central confirmada conforme protocolo institucional.", "% require review of osmolarity, glucose levels, compatibility, infusion rate, and vascular access; generally avoid routine peripheral access and consider central or umbilical access with confirmed central tip position per institutional protocol."], ["Modo precisão ativado para peso < 1,5 kg: os volumes de NaCl, KCl e gluconato de cálcio são exibidos com 2 casas decimais para reduzir erro proporcional por arredondamento. O volume base glicosado por etapa permanece com 1 casa decimal.", "Precision mode enabled for weight < 1.5 kg: NaCl, KCl, and calcium gluconate volumes are displayed with 2 decimal places to reduce proportional rounding error. The dextrose base volume per stage remains at 1 decimal place."], [" Esse valor não corresponde ao volume de gluconato de cálcio. Revisar dose, volume final, velocidade de infusão, cálcio sérico/ionizado, compatibilidades, risco de extravasamento, via de infusão e protocolo institucional.", " This value does not represent calcium gluconate volume. Review dose, final volume, infusion rate, serum/ionized calcium, compatibility, extravasation risk, access route, and institutional protocol."], [" mg/mL de gluconato de cálcio na solução. Para infusão contínua, referências de bula descrevem diluição usual até 10 mg/mL. Para ficar em até 10 mg/mL, o volume total da solução precisaria ser de pelo menos ", " mg/mL of calcium gluconate in solution. For continuous infusion, labeling describes usual dilution to 10 mg/mL. To remain at or below 10 mg/mL, total solution volume would need to be at least "], [" Esse valor não corresponde ao volume de NaCl. Revisar indicação, sódio sérico, volume final, número de etapas, osmolaridade final, velocidade de infusão, via de infusão e protocolo institucional.", " This value does not represent the volume of NaCl. Review indication, serum sodium, final volume, stage count, final osmolarity, infusion rate, access route, and institutional protocol."], [" Esse valor não corresponde ao volume de KCl. Revisar dose de K, volume final, número de etapas, velocidade de infusão, monitorização, via de infusão e protocolo institucional.", " This value does not represent the volume of KCl. Review potassium dose, final volume, stage count, infusion rate, monitoring, access route, and institutional protocol."], [" mL por etapa, mas isso ultrapassa o limite máximo permitido para o volume hídrico total. Revisar concentração desejada, soros selecionados, número de etapas e prescrição.", " mL per stage, but this exceeds the permitted total fluid volume. Review desired concentration, selected solutions, stage count, and prescription."], ["Volume base SG por etapa igual a zero. A etapa calculada ficou composta apenas por eletrólitos; revisar a adequação do volume final, osmolaridade e segurança da infusão.", "Dextrose base volume per stage is zero. The calculated stage contains only electrolytes; review the final volume, osmolarity, and infusion safety."], [" mg/kg/min. Revisar glicemia, idade gestacional, dia de vida, necessidade metabólica, concentração de glicose, volume, velocidade de infusão e protocolo institucional.", " mg/kg/min. Review glucose levels, gestational age, postnatal day, metabolic needs, dextrose concentration, volume, infusion rate, and institutional protocol."], [" Mantendo a mesma concentração de glicose desejada e as mesmas cargas de eletrólitos, o volume total estimado da solução precisaria ser de pelo menos ", " Keeping the desired dextrose concentration and electrolyte loads unchanged, the estimated total solution volume would need to be at least "], [" mg/kg/min. Correlacionar com glicemia, prematuridade, dia de vida, necessidade metabólica, concentração de glicose, volume e segurança da infusão.", " mg/kg/min. Correlate with glucose levels, prematurity, postnatal day, metabolic needs, dextrose concentration, volume, and infusion safety."], [" mEq/L. Para diluir a carga de sódio prescrita até a referência isotônica de 154 mEq/L, o volume total da solução precisaria ser de pelo menos ", " mEq/L. To dilute the prescribed sodium load to the 154 mEq/L isotonic reference, total solution volume would need to be at least "], [" Revisar concentração de glicose, eletrólitos, volume final, velocidade de infusão, via de infusão, compatibilidades e protocolo institucional.", " Review dextrose concentration, electrolytes, final volume, infusion rate, access route, compatibility, and institutional protocol."], [" mL. Para manter a exibição com 1 casa decimal e tornar a mistura operacionalmente representável, o volume base foi aumentado de ", " mL. To preserve display with one decimal place and make the mixture operationally representable, base volume was increased from "], [" Mantendo a mesma concentração de glicose desejada, não há volume total finito capaz de reduzir a osmolaridade estimada até ", " Keeping the same desired dextrose concentration, no finite total volume can reduce the estimated osmolarity to "], [" mEq/L. Para diluir a dose de potássio prescrita até 40 mEq/L, o volume total da solução precisaria ser de pelo menos ", " mEq/L. To dilute the prescribed potassium dose to 40 mEq/L, the total solution volume would need to be at least "], ["%. Revisar osmolaridade final, sítio venoso, risco de flebite/extravasamento, glicemia e protocolo institucional.", "%. Review final osmolarity, venous site, phlebitis/extravasation risk, glucose levels, and institutional protocol."], ["Preparo por etapas de Hidratação Venosa Neonatal com mistura de soluções e cálculo da Taxa de Infusão de Glicose", "Stage-by-stage preparation of neonatal IV fluids, solution mixing, and glucose infusion rate calculation"], [" Mantendo as mesmas cargas de eletrólitos, o volume total estimado da solução precisaria ser de pelo menos ", " Keeping electrolyte loads unchanged, the estimated total solution volume would need to be at least "], [", para atingir essa referência. Esse valor é uma estimativa físico-química e não corresponde ao volume de ", ", to reach this reference. This is a physicochemical estimate and does not represent the volume of "], [" Não foi possível estimar com segurança o volume mínimo apenas a partir da osmolaridade calculada.", " The minimum volume could not be safely estimated based on calculated osmolarity alone."], ["O volume mínimo para tornar a mistura glicosada operacional com 1 casa decimal seria ", "The minimum volume required to make the dextrose mixture operational with one decimal place would be "], ["A prescrição da hidratação será montada automaticamente conforme os cálculos atuais.", "The fluid prescription will be assembled automatically based on current calculations."], [" mOsm/L; seria necessário reduzir a concentração de glicose e/ou a carga de solutos.", " mOsm/L; the dextrose concentration and/or solute load would need to be reduced."], ["Revise o campo indicado. A prescrição anterior não corresponde aos dados em edição.", "Review the indicated field. The previous prescription does not correspond to the data being edited."], ["Dados alterados. Confirme o campo ou use Calcular para atualizar os resultados.", "Data changed. Confirm the field or select Calculate to update the results."], ["Volume base glicosado aumentado automaticamente: a mistura calculada tinha", "Dextrose base volume automatically increased: the calculated mixture had"], ["Gluconato de cálcio muito concentrado: concentração final estimada de", "Highly concentrated calcium gluconate: estimated final concentration of"], ["A TIG calculada gerou concentração fora da faixa possível (0% a 50%).", "The calculated glucose infusion rate yielded an impossible concentration (0% to 50%)."], ["Osmolaridade reduzida / solução hipotônica: osmolaridade estimada de", "Low osmolarity / hypotonic solution: estimated osmolarity of"], ["Etapas devem ser uma das opções permitidas: 1, 2, 3, 4, 6, 8 ou 12.", "Stages must be one of the permitted options: 1, 2, 3, 4, 6, 8, or 12."], ["Concentração desejada deve estar entre os dois soros (inclusive).", "Desired concentration must lie between the two solutions (inclusive)."], ["Gluconato de cálcio concentrado: concentração final estimada de", "Concentrated calcium gluconate: estimated final concentration of"], [" mL por etapa. A taxa hídrica total e a TIG foram recalculadas.", " mL per stage. Total fluid rate and glucose infusion rate were recalculated."], ["Volume total da etapa menor que a soma bruta dos eletrólitos.", "Total stage volume is below the sum of undiluted electrolyte volumes."], ["Os soros glicosados permitidos são: 0%, 5%, 10%, 25% e 50%.", "Permitted dextrose solutions are: 0%, 5%, 10%, 25%, and 50%."], ["Osmolaridade limítrofe/elevada: osmolaridade estimada de", "Borderline/elevated osmolarity: estimated osmolarity of"], ["Concentração desejada fora do intervalo entre os soros.", "Desired concentration is outside the interval between solutions."], ["Os volumes dos soros não podem exceder o volume base.", "Solution volumes cannot exceed the base volume."], ["Campo editável para recálculo inverso da prescrição.", "Editable field for reverse prescription calculation."], ["Potássio elevado: concentração final estimada de", "Elevated potassium: estimated final concentration of"], ["Osmolaridade aumentada: osmolaridade estimada de", "Elevated osmolarity: estimated osmolarity of"], ["Peso < 0,3 kg não suportado por esta ferramenta.", "Weight < 0.3 kg is not supported by this tool."], ["Peso > 20 kg não suportado por esta ferramenta.", "Weight > 20 kg is not supported by this tool."], ["O 1º soro deve ter concentração menor que o 2º.", "The first solution must have a lower concentration than the second."], ["Glicose acima de 10%: concentração desejada de", "Dextrose above 10%: desired concentration of"], [" mOsm/L, abaixo da referência conservadora de ", " mOsm/L, below the conservative reference of "], ["Sódio elevado: concentração final estimada de", "Elevated sodium: estimated final concentration of"], ["Glicose concentrada: concentração desejada de", "Concentrated dextrose: desired concentration of"], [" mOsm/L, acima da referência conservadora de ", " mOsm/L, above the conservative reference of "], [" mEq/L, acima da referência conservadora de ", " mEq/L, above the conservative reference of "], ["Informe o Peso de Cálculo antes de calcular.", "Enter the calculation weight before calculating."], ["Complete o número após o separador decimal.", "Complete the number after the decimal separator."], [" mOsm/L, acima da referência de alerta de ", " mOsm/L, above the alert reference of "], ["Volumes dos soros não podem ser negativos.", "Solution volumes cannot be negative."], ["Aviso Legal e Isenção de Responsabilidade", "Legal Disclaimer and Limitation of Liability"], ["glicose, NaCl, KCl ou gluconato de cálcio", "dextrose, NaCl, KCl, or calcium gluconate"], [" mEq/L, acima da referência isotônica de ", " mEq/L, above the isotonic reference of "], ["Valores clínicos não podem ser negativos.", "Clinical values cannot be negative."], ["Selecione o texto e copie manualmente.", "Select the text and copy it manually."], ["A mistura resultou em volume negativo.", "The mixture produced a negative volume."], ["Informe um número válido neste campo.", "Enter a valid number in this field."], ["mg/kg/dia de gluconato de cálcio 10%", "mg/kg/day of calcium gluconate 10%"], ["Campo apenas de exibição automática.", "Automatic display-only field."], ["Número de etapas/intervalo em horas", "Number of stages/interval in hours"], ["Campo editável com cálculo reverso.", "Editable field with reverse calculation."], ["Gluconato de cálcio 10% por etapa", "Calcium gluconate 10% per stage"], ["Campo editável de entrada direta.", "Editable direct-entry field."], ["mL/kg/dia de volume hídrico total", "mL/kg/day of total fluid volume"], ["② Mistura de Soluções Glicosadas", "② Dextrose Solution Mixing"], ["Cálcio (gluconato de cálcio 10%)", "Calcium (calcium gluconate 10%)"], ["NaCl, KCl ou gluconato de cálcio", "NaCl, KCl, or calcium gluconate"], ["Volumes não podem ser negativos.", "Volumes cannot be negative."], ["Volume base glicosado por etapa", "Dextrose base volume per stage"], ["Concentração do 1º soro (menor)", "Concentration of 1st solution (lower)"], ["Concentração do 2º soro (maior)", "Concentration of 2nd solution (higher)"], [" com volume positivo menor que ", " with a positive volume below "], ["Volume base da etapa inválido.", "Invalid stage base volume."], ["Cálculo de Hidratação Venosa", "Intravenous Fluid Calculation"], ["AJUSTE AUTOMÁTICO DA MISTURA", "AUTOMATIC MIXTURE ADJUSTMENT"], ["💧Hidratação Venosa Neonatal", "💧Neonatal Intravenous Fluid Therapy"], ["Ocorreu um erro inesperado.", "An unexpected error occurred."], ["Aguardando cálculo válido.", "Waiting for valid calculation."], ["Calculado automaticamente.", "Calculated automatically."], ["Horas por etapa inválidas.", "Invalid hours per stage."], ["① Parâmetros de Entrada", "① Input Parameters"], ["③ Prescrição por Etapa", "③ Prescription per Stage"], ["Prescrição atualizada.", "Prescription updated."], ["Concentração desejada", "Desired concentration"], ["Volume total da etapa", "Total volume per stage"], ["Velocidade de infusão", "Infusion rate"], ["Osmolaridade estimada", "Estimated osmolarity"], ["0% (Água destilada)", "0% (Distilled water)"], ["Aguardando cálculo.", "Waiting for calculation."], ["Cálculo atualizado.", "Calculation updated."], ["Taxa hídrica total", "Total fluid rate"], ["Potássio (KCl 10%)", "Potassium (KCl 10%)"], ["TIG muito elevada:", "Very high glucose infusion rate:"], ["Erro de validação", "Validation error"], ["Volume do 1º soro", "Volume of 1st solution"], ["Volume do 2º soro", "Volume of 2nd solution"], ["KCl 10% por etapa", "KCl 10% per stage"], ["Copiar", "Copy"], ["Gerar", "Generate"], ["Desenvolvido por", "Developed by"], ["ALERTAS CLÍNICOS", "CLINICAL ALERTS"], [", equivalente a ", ", equivalent to "], ["Peso de cálculo", "Calculation weight"], ["Tempo por etapa", "Time per stage"], ["Gluconato de Ca", "Calcium gluconate"], ["NaCl por etapa", "NaCl per stage"], ["Volume nas 24h", "24-hour volume"], ["Água destilada", "Distilled water"], ["Volume Total =", "Total Volume ="], ["④ Prescrição", "④ Prescription"], ["Taxa hídrica", "Fluid rate"], ["Sódio (NaCl)", "Sodium (NaCl)"], ["Limpar Dados", "Clear Data"], ["Limpar dados", "Clear data"], ["Texto limpo.", "Text cleared."], ["etapas/dia ·", "stages/day ·"], ["mg/kg/minuto", "mg/kg/minute"], ["mL por etapa", "mL per stage"], ["TIG elevada:", "High glucose infusion rate:"], ["Referências", "References"], ["h por etapa", "h per stage"], ["etapas/dia", "stages/day"], ["Infundir a", "Infuse at"], ["mL/hora de", "mL/hour over"], ["% glicose", "% dextrose"], ["✓ Copiado", "✓ Copied"], [" mL para ", " mL to "], ["Calcular", "Calculate"], ["ml/hora", "mL/hour"], ["Idioma", "Language"], ["Limpar prescrição", "Clear prescription"], ["Limpar", "Clear"], ["horas", "hours"], ["S.G. ", "Dextrose "]];
+  const replacements = new Map(PAIRS);
+  const pattern = new RegExp(PAIRS.map(p=>p[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),'g');
+  let language='pt-BR';
+  const textOrigins = new WeakMap();
+  const attrOrigins = new WeakMap();
+  let lastPrescriptionPT='', lastPrescriptionEN='', lastAutoDisplay='';
+  const prescription = document.getElementById('prescricaoEtapaTexto');
+  function translate(value) {
+    const source=String(value==null?'':value);
+    if(language!=='en-US')return source;
+    return source.replace(pattern,m=>replacements.get(m)||m);
+  }
+  function translateSource(source){return String(source).replace(pattern,m=>replacements.get(m)||m);}
+  function presentPrescription(source){
+    lastPrescriptionPT=source;
+    lastPrescriptionEN=translateSource(source);
+    lastAutoDisplay=language==='en-US'?lastPrescriptionEN:lastPrescriptionPT;
+    return lastAutoDisplay;
+  }
+  function walk(root) {
+    if (!root || !root.isConnected) return;
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    const texts=[];while(walker.nextNode())texts.push(walker.currentNode);
+    texts.forEach(node=>{
+      const parent=node.parentElement;
+      if(!parent || parent.closest('script,style'))return;
+      const existing=textOrigins.get(node);
+      if(!existing || node.nodeValue!==existing.rendered){
+        textOrigins.set(node,{source:node.nodeValue,rendered:node.nodeValue});
+      }
+      const origin=textOrigins.get(node);
+      const next=language==='en-US'?translateSource(origin.source):origin.source;
+      origin.rendered=next;
+      if(node.nodeValue!==next)node.nodeValue=next;
+    });
+    const nodes = root.nodeType===1?[root,...root.querySelectorAll('*')]:[];
+    nodes.forEach(el=>{
+      if(el.matches('script,style'))return;
+      for(const key of ['title','placeholder','aria-label']){
+        if(!el.hasAttribute(key))continue;
+        let data=attrOrigins.get(el)||{};const current=el.getAttribute(key);
+        if(!data[key] || current!==data[key].rendered)data[key]={source:current,rendered:current};
+        const next=language==='en-US'?translateSource(data[key].source):data[key].source;
+        data[key].rendered=next;
+        attrOrigins.set(el,data);
+        if(current!==next)el.setAttribute(key,next);
+      }
+    });
+  }
+  function setLanguage(lang){
+    if(lang!=='pt-BR' && lang!=='en-US')return;
+    language=lang;
+    document.documentElement.lang=lang;
+    document.getElementById('hvneoLanguageSelect').value=lang;
+    walk(document.body);
+    if(prescription && prescription.value===lastAutoDisplay){
+      const next=lang==='en-US'?lastPrescriptionEN:lastPrescriptionPT;
+      prescription.value=next;lastAutoDisplay=next;window.hvneoFitPrescription?.();
+    }
+  }
+  window.HvNeoLanguage={get lang(){return language},translate,presentPrescription,setLanguage};
+  const selection=document.getElementById('hvneoLanguageSelect');
+  selection.addEventListener('change',()=>setLanguage(selection.value));
+  const observer=new MutationObserver(records=>{
+    if(!records.some(r=>r.target && r.target.isConnected))return;
+    walk(document.body);
+  });
+  document.addEventListener('DOMContentLoaded',()=>{
+    walk(document.body);
+    observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','placeholder','aria-label']});
+  });
+})();
+</script>
+<script id="hvneo-visual-navigation">
+document.querySelectorAll('.hvneo-up-arrow').forEach(function(button){
+  button.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+});
+</script>
 </body>
 </html>
